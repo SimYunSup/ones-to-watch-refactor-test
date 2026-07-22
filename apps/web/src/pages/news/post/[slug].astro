@@ -1,0 +1,392 @@
+---
+import { getCollection, render } from "astro:content";
+import "@/styles/content.css";
+import Layout from "@/components/BasicLayout.astro";
+
+export async function getStaticPaths() {
+  const collection = await getCollection("news");
+  return collection.map((news) => ({ params: { slug: news.id }, props: { news } }));
+}
+
+const { news } = Astro.props;
+
+const { Content } = await render(news);
+const thumbnail =
+  news.data.cover?.type === "file"
+    ? news.data.cover.file.url
+    : news.data.cover?.type === "external"
+      ? news.data.cover.external.url
+      : undefined;
+---
+
+<Layout
+  pageTitle={news.data.properties.이름}
+  description={`${news.data.properties.이름} - ${new Intl.DateTimeFormat("ko-KR").format(new Date())}`}
+  imageUrl={thumbnail}
+>
+  <!-- Reading progress bar -->
+  <div class="reading-progress-bar" id="reading-progress"></div>
+
+  <article class="container">
+    {
+      news.data.cover?.type === "file" && (
+        <div class="image-container">
+          <img
+            src={thumbnail}
+            alt=""
+            style={`view-transition-name: post-thumb-${news.id}`}
+          />
+        </div>
+      )
+    }
+    <h1 class="title">
+      {news.data.properties.이름}
+    </h1>
+    <div class="description">
+      <p>
+        {
+          new Intl.DateTimeFormat("ko-KR").format(
+            news.data.properties.날짜?.start,
+          )
+        }
+      </p>
+    </div>
+
+    <!-- Content wrapper with sidebar layout -->
+    <div class="content-wrapper">
+      <!-- Table of Contents -->
+      <aside
+        class="toc-container"
+        id="table-of-contents"
+        style="display: none;"
+      >
+        <h3 class="toc-title">
+          목차
+          <button
+            class="toc-toggle"
+            id="toc-toggle"
+            aria-label="Toggle table of contents">▼</button
+          >
+        </h3>
+        <ul class="toc-list" id="toc-list"></ul>
+      </aside>
+
+      <!-- Article content -->
+      <div class="markdown-body" id="article-content">
+        <Content />
+      </div>
+    </div>
+    <script>
+      // Reading progress bar
+      function updateReadingProgress() {
+        const progressBar = document.getElementById("reading-progress");
+        const article = document.getElementById("article-content");
+
+        if (!progressBar || !article) return;
+
+        const articleTop = article.offsetTop;
+        const articleHeight = article.offsetHeight;
+        const windowHeight = window.innerHeight;
+        const scrollTop =
+          window.pageYOffset || document.documentElement.scrollTop;
+
+        const scrollStart = articleTop;
+        const scrollEnd = articleTop + articleHeight - windowHeight;
+        const scrollProgress =
+          (scrollTop - scrollStart) / (scrollEnd - scrollStart);
+
+        const percentage = Math.min(Math.max(scrollProgress * 100, 0), 100);
+        progressBar.style.width = `${percentage}%`;
+      }
+
+      window.addEventListener("scroll", updateReadingProgress);
+      window.addEventListener("resize", updateReadingProgress);
+      updateReadingProgress();
+
+      // Table of Contents generation
+      function generateTableOfContents() {
+        const markdownElement = document.querySelector(".markdown-body");
+        const tocContainer = document.getElementById("table-of-contents");
+        const tocList = document.getElementById("toc-list");
+
+        if (!markdownElement || !tocContainer || !tocList) return;
+
+        const headings = markdownElement.querySelectorAll("h2");
+
+        if (headings.length === 0) return;
+
+        tocContainer.style.display = "block";
+
+        headings.forEach((heading) => {
+          const id = heading.id;
+          const text = heading.textContent;
+
+          if (!id) return;
+
+          const li = document.createElement("li");
+          li.className = "toc-item";
+
+          const a = document.createElement("a");
+          a.href = `#${id}`;
+          a.textContent = text;
+          a.className = "toc-link";
+
+          a.addEventListener("click", (e) => {
+            e.preventDefault();
+            heading.scrollIntoView({ behavior: "smooth", block: "start" });
+            window.history.pushState(null, "", `#${id}`);
+          });
+
+          li.appendChild(a);
+          tocList.appendChild(li);
+        });
+
+        // Highlight active section in TOC
+        function updateActiveTocLink() {
+          if (!markdownElement) return;
+          const headings = Array.from(markdownElement.querySelectorAll("h2"));
+          const tocLinks = document.querySelectorAll(".toc-link");
+
+          let activeIndex = -1;
+          const scrollPosition = window.scrollY + 100;
+
+          headings.forEach((heading, index) => {
+            if (heading.offsetTop <= scrollPosition) {
+              activeIndex = index;
+            }
+          });
+
+          tocLinks.forEach((link, index) => {
+            if (index === activeIndex) {
+              link.classList.add("active");
+            } else {
+              link.classList.remove("active");
+            }
+          });
+        }
+
+        window.addEventListener("scroll", updateActiveTocLink);
+        updateActiveTocLink();
+      }
+
+      generateTableOfContents();
+
+      // TOC toggle for mobile
+      const tocToggle = document.getElementById("toc-toggle");
+      const tocList = document.getElementById("toc-list");
+
+      if (tocToggle && tocList) {
+        tocToggle.addEventListener("click", () => {
+          const isCollapsed = tocList.classList.contains("collapsed");
+
+          if (isCollapsed) {
+            tocList.classList.remove("collapsed");
+            tocToggle.textContent = "▼";
+          } else {
+            tocList.classList.add("collapsed");
+            tocToggle.textContent = "▶";
+          }
+        });
+      }
+
+      // Code block copy buttons
+      function addCopyButtonsToCodeBlocks() {
+        const markdownElement = document.querySelector(".markdown-body");
+        if (!markdownElement) return;
+
+        const codeBlocks = markdownElement.querySelectorAll("pre");
+
+        codeBlocks.forEach((pre) => {
+          const code = pre.querySelector("code");
+          if (!code) return;
+
+          const button = document.createElement("button");
+          button.className = "copy-code-button";
+          button.textContent = "복사";
+          button.setAttribute("aria-label", "Copy code to clipboard");
+
+          button.addEventListener("click", async () => {
+            try {
+              await navigator.clipboard.writeText(code.textContent || "");
+              button.textContent = "복사됨!";
+              button.classList.add("copied");
+
+              setTimeout(() => {
+                button.textContent = "복사";
+                button.classList.remove("copied");
+              }, 2000);
+            } catch (err) {
+              console.error("Failed to copy code:", err);
+              button.textContent = "실패";
+              setTimeout(() => {
+                button.textContent = "복사";
+              }, 2000);
+            }
+          });
+
+          pre.style.position = "relative";
+          pre.appendChild(button);
+        });
+      }
+
+      addCopyButtonsToCodeBlocks();
+
+      // Existing heading click-to-copy functionality
+      const markdownElement = document.querySelector(".markdown-body");
+      const headingElements = markdownElement?.querySelectorAll("h2");
+      if (headingElements) {
+        Array.from(headingElements).forEach((element) => {
+          element.addEventListener("click", (e) => {
+            const targetElement = e.currentTarget;
+            if (!(targetElement instanceof Element)) {
+              return;
+            }
+            const id = targetElement?.id;
+            if (!id) {
+              return;
+            }
+            const url = new URL(window.document.location.href);
+            url.hash = `#${id}`;
+            window.document.location.assign(url);
+            window.navigator.clipboard.writeText(url.toString());
+          });
+        });
+      }
+    </script>
+    <script>
+      function getGiscusTheme() {
+        const theme = document.documentElement.getAttribute("data-theme");
+        return theme === "dark" ? "dark" : "light";
+      }
+
+      function setGiscusTheme() {
+        const iframe = document.querySelector("iframe.giscus-frame");
+        if (!iframe) return;
+        const theme = getGiscusTheme();
+        const contentWindow = (iframe as HTMLIFrameElement).contentWindow;
+        if (contentWindow) {
+          contentWindow.postMessage(
+            {
+              giscus: {
+                setConfig: {
+                  theme: theme,
+                },
+              },
+            },
+            "https://giscus.app",
+          );
+        }
+      }
+
+      // Sync on load
+      const iframe = document.querySelector("iframe.giscus-frame");
+      if (iframe) {
+        iframe.addEventListener("load", setGiscusTheme);
+      }
+
+      // Sync on theme change
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (
+            mutation.type === "attributes" &&
+            mutation.attributeName === "data-theme"
+          ) {
+            setGiscusTheme();
+          }
+        });
+      });
+
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"],
+      });
+    </script>
+    <script
+      src="https://giscus.app/client.js"
+      data-repo="SimYunSup/newsletter-ones-to-watch"
+      data-repo-id="R_kgDOKO1eRg"
+      data-category-id="DIC_kwDOKO1eRs4CZDYo"
+      data-mapping="pathname"
+      data-strict="0"
+      data-reactions-enabled="1"
+      data-emit-metadata="0"
+      data-input-position="bottom"
+      data-theme="light"
+      data-lang="ko"
+      data-loading="lazy"
+      crossorigin="anonymous"
+      async></script>
+    <script>
+      // Native search-term highlighting. When arriving from the munja search
+      // box (which appends `?q=<query>`), highlight every matched term inside
+      // the article and scroll to the first hit — using the browser-native CSS
+      // Custom Highlight API (no DOM rewrite), with a <mark> fallback.
+      (() => {
+        const q = new URLSearchParams(location.search).get("q");
+        if (!q) return;
+        const terms = q
+          .toLowerCase()
+          .split(/\s+/)
+          .filter(Boolean);
+        if (!terms.length) return;
+
+        const root = document.querySelector(".markdown-body");
+        if (!root) return;
+
+        const ranges: Range[] = [];
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        let node: Node | null;
+        while ((node = walker.nextNode())) {
+          const text = (node.nodeValue ?? "").toLowerCase();
+          for (const t of terms) {
+            let i = text.indexOf(t);
+            while (i !== -1) {
+              const r = document.createRange();
+              r.setStart(node, i);
+              r.setEnd(node, i + t.length);
+              ranges.push(r);
+              i = text.indexOf(t, i + t.length);
+            }
+          }
+        }
+        if (!ranges.length) return;
+
+        const CSSns = CSS as unknown as {
+          highlights?: Map<string, unknown>;
+        };
+        if (CSSns.highlights && "Highlight" in window) {
+          // @ts-expect-error — Highlight is a recent global.
+          CSSns.highlights.set("munja-search", new Highlight(...ranges));
+        } else {
+          // Fallback: wrap in <mark>, in reverse so earlier offsets stay valid.
+          for (let k = ranges.length - 1; k >= 0; k--) {
+            try {
+              const m = document.createElement("mark");
+              m.className = "munja-hit";
+              ranges[k].surroundContents(m);
+            } catch {
+              /* skip ranges that cross element boundaries */
+            }
+          }
+        }
+
+        const target =
+          ranges[0].startContainer.parentElement ??
+          (ranges[0].startContainer as Element | null);
+        target?.scrollIntoView({ behavior: "smooth", block: "center" });
+      })();
+    </script>
+    <style is:global>
+      ::highlight(munja-search) {
+        background-color: #fde68a;
+        color: #111827;
+      }
+      .markdown-body mark.munja-hit {
+        background-color: #fde68a;
+        color: #111827;
+        border-radius: 2px;
+        padding: 0 1px;
+      }
+    </style>
+  </article>
+</Layout>

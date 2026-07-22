@@ -1,0 +1,47 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { withBase } from '@/lib/url';
+import '../styles/global.css';
+export interface Props {
+  pageTitle: string;
+  description?: string;
+  imageUrl?: string;
+}
+const {
+  pageTitle,
+  description,
+  imageUrl,
+} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <meta name="generator" content={Astro.generator} />
+  <link rel="icon" href={withBase("favicon.svg")} type="image/svg+xml">
+  <title>{pageTitle}</title>
+  <meta property="og:image" content={imageUrl ?? withBase("images/og.png")} />
+  <meta name="google-site-verification" content="ykyTYLh42SM_2IrBWFVopxp203cmvmcANgKIEtYWbfI" />
+  <meta property="og:url" content={Astro.url} />
+  {description ? (
+    <meta name="description" content={description} />
+  ) : null}
+  <meta property="og:title" content={pageTitle} />
+  <slot name="head" />
+</head>
+<body>
+<Header />
+<slot />
+<Footer />
+<script type="text/partytown" src="https://www.googletagmanager.com/gtag/js?id=G-LZV8S3RFR3"></script>
+<script type="text/partytown">
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LZV8S3RFR3');
+</script>
+</body>
+</html>

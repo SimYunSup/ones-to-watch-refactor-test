@@ -1,0 +1,36 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { withBase } from "@/lib/url";
+import "../styles/global.css";
+import "../styles/content.css";
+const { frontmatter } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" href={withBase("favicon.svg")} type="image/svg+xml" />
+    <title>{frontmatter.title}</title>
+    <meta property="og:image" content={withBase("images/og.png")} />
+    {
+      frontmatter.description ? (
+        <meta name="description" content={frontmatter.description} />
+      ) : null
+    }
+    <meta property="og:title" content={frontmatter.title} />
+    <slot name="head" />
+  </head>
+  <body>
+    <Header />
+    <main class="container">
+      <div class="markdown-body" style="padding: 1rem; background: inherit;">
+        <slot />
+      </div>
+    </main>
+    <Footer />
+  </body>
+</html>

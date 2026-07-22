@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@/components/BasicLayout.astro';
+import Post from '@/components/Post.astro';
+import Search from '@/components/Search.astro';
+import { withBase } from '@/lib/url';
+import "@/styles/list-page.css";
+
+export async function getStaticPaths() {
+  const collection = await getCollection('news');
+  const pageCount = Math.max(1, Math.ceil(collection.length / 12));
+  return Array.from({ length: pageCount }, (_, i) => ({ params: { page: String(i + 1) } }));
+}
+
+const { page } = Astro.params;
+const collection = await getCollection('news');
+const validatedPage = Number(page as string);
+
+const sorted = collection.sort(
+  (a, b) => (b.data.properties.날짜?.start.getTime() ?? 0) - (a.data.properties.날짜?.start.getTime() ?? 0));
+const list = sorted.slice(12 * (validatedPage - 1), 12 * validatedPage);
+const length = collection.length;
+const hasPrev = validatedPage > 1;
+const hasNext = length > 12 * validatedPage;
+---
+
+<Layout pageTitle={`${validatedPage}페이지 | OTW for FE`}>
+  <main class="archive">
+    <p class="mono-eyebrow">// archive</p>
+    <h1 class="archive-title">뉴스레터 아카이브</h1>
+
+    <div class="archive-search">
+      <Search />
+    </div>
+
+    <div class="post-list">
+      {list.map((post) => <Post post={post} />)}
+    </div>
+
+    <nav class="pager">
+      {hasPrev ? (
+        <a class="pager-btn" href={withBase(`news/list/${validatedPage - 1}`)}>← 이전</a>
+      ) : (
+        <span></span>
+      )}
+      <span class="pager-current">{validatedPage}</span>
+      {hasNext ? (
+        <a class="pager-btn" href={withBase(`news/list/${validatedPage + 1}`)}>다음 →</a>
+      ) : (
+        <span></span>
+      )}
+    </nav>
+  </main>
+</Layout>

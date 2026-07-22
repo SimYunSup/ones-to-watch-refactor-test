@@ -1,0 +1,38 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { withBase } from '@/lib/url';
+import styles from "@/styles/components/post.module.css";
+
+export interface Props {
+  post: CollectionEntry<"news">;
+};
+const { post } = Astro.props;
+
+const { properties: data } = post.data;
+const thumbSrc =
+  post.data.cover?.type === "file"
+    ? post.data.cover.file.url
+    : post.data.cover?.type === "external"
+      ? post.data.cover.external.url
+      : undefined;
+const dateLabel = data.날짜?.start
+  ? new Intl.DateTimeFormat("ko-KR").format(data.날짜.start)
+  : null;
+---
+
+<a href={withBase(`news/post/${post.id}`)} class={styles.row}>
+  <span class={styles.thumb}>
+    {thumbSrc ? (
+      <img
+        src={thumbSrc}
+        alt=""
+        loading="lazy"
+        style={`view-transition-name: post-thumb-${post.id}`}
+      />
+    ) : (
+      "thumbnail"
+    )}
+  </span>
+  <span class={styles.title}>{data.이름}</span>
+  {dateLabel && <span class={styles.date}>{dateLabel}</span>}
+</a>

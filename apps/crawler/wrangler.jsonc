@@ -1,0 +1,45 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "newsletter-queuing",
+	"main": "./index.ts",
+	"compatibility_date": "2025-05-04",
+	"compatibility_flags": [
+		"nodejs_compat_v2"
+	],
+	"observability": {
+		"enabled": true
+	},
+	"queues": {
+		"consumers": [
+			{
+				"queue": "newletter-crawl-queue"
+			}
+		],
+		"producers": [
+			{
+				"binding": "CRALWER_QUEUE",
+				"queue": "newletter-crawl-queue"
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "NEWSLETTER_CRAWL",
+			"id": "3e0e8a0ef4154797b8ae7827b599f140",
+      "preview_id": "a9f2a3f709d44ccea70828d18db38f85"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "IMAGES",
+			"bucket_name": "newsletter-image"
+		}
+	],
+  "browser": {
+    "binding": "MYBROWSER"
+  }
+}

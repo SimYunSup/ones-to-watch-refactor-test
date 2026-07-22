@@ -1,0 +1,246 @@
+.container {
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Header styles */
+.header {
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  background-color: var(--header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 50;
+  transition: background-color 0.3s ease;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  height: 4rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.left,
+.right {
+  display: flex;
+  align-items: center;
+}
+
+.right {
+  gap: 1rem;
+}
+
+.left {
+  gap: 3rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  color: var(--foreground);
+  transition: all 0.2s ease;
+}
+
+.logo:hover {
+  color: var(--primary-color);
+}
+
+.logo-sub {
+  margin: 0 .2rem auto;
+  font-size: .875rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+  color: var(--muted-color);
+}
+
+.logo-img {
+  margin-right: .5rem;
+  width: 2rem;
+  height: 2rem;
+  color: currentColor;
+  transition: filter 0.2s ease;
+}
+
+.logo:hover .logo-img {
+  filter: drop-shadow(0 2px 4px rgba(48, 62, 204, 0.4));
+}
+
+.desktop-nav {
+  display: none;
+}
+
+.link {
+  font-weight: 500;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  color: var(--muted-color);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  bottom: 0.25rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  height: 2px;
+  background: var(--primary-color);
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.link:hover {
+  color: var(--foreground);
+  background-color: var(--hover-bg);
+}
+
+.link[aria-current] {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.link[aria-current]::after {
+  transform: scaleX(1);
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-color);
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+}
+
+.theme-toggle:hover {
+  color: var(--primary-color);
+  background-color: var(--hover-bg);
+  transform: rotate(15deg);
+}
+
+.theme-toggle svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  transition: transform 0.3s ease;
+}
+
+.icon-link {
+  color: var(--muted-color);
+  transition: all 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-link:hover {
+  color: var(--primary-color);
+  background-color: var(--hover-bg);
+}
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.mobile-menu-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-color);
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+}
+
+.mobile-menu-button:hover {
+  color: var(--primary-color);
+  background-color: var(--hover-bg);
+}
+
+.mobile-nav {
+  position: absolute;
+  display: none;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  width: 100%;
+  background-color: var(--mobile-nav-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.mobile-nav:global(.active) {
+  display: flex;
+}
+
+.mobile-nav .link {
+  padding: 0.875rem 1rem;
+  margin: 0.25rem 0;
+}
+
+/* Footer styles */
+.footer {
+  border-top: 1px solid var(--border-color);
+  padding: 1.5rem 0;
+}
+
+.footer-content {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--muted-color);
+}
+
+/* Utility classes */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Responsive styles */
+@media (min-width: 768px) {
+  .desktop-nav {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .mobile-menu-button {
+    display: none;
+  }
+
+  .container {
+    padding: 0 1.5rem;
+  }
+}

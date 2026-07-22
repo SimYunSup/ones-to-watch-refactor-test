@@ -1,0 +1,39 @@
+![thumbnail](./apps/web/public/images/thumbnail.png)
+
+# Ones To Watch For FrontEnd (KR) — Monorepo
+
+**Ones to Watch for FE**는 주목할 만한 블로그를 모아두는 웹사이트입니다.
+개인적인 관심과 기록의 의미로 시작했으며, 프론트엔드 개발자에게 인사이트가 될 수 있을만한 글을 소개합니다.
+
+이 저장소는 pnpm 워크스페이스 모노레포로 구성되어 있습니다.
+
+## 구조
+
+- `apps/web` — 정적(Static) Astro 사이트. GitHub Pages(`https://simyunsup.github.io/ones-to-watch-refactor-test/`)에 배포됩니다.
+- `apps/crawler` — 뉴스레터 썸네일/북마크 크롤링을 담당하는 Cloudflare Queue 워커.
+- `packages/notion-loader` — Notion을 Astro Content Layer로 불러오는 재사용 가능한 로더 패키지(`@otw/notion-loader`).
+
+## 개발
+
+Node.js(fnm 권장, `.nvmrc` 참고)가 설치되어야 합니다.
+
+```bash
+corepack enable # 만약 pnpm이 없다면
+
+pnpm install
+
+pnpm dev
+```
+
+`pnpm build`는 `apps/web`을 정적 사이트로 빌드합니다(`apps/web/dist`).
+
+## 컨텐츠
+
+콘텐츠 로딩에는 `NOTION_TOKEN`, `NOTION_DATABASE_ID` 환경 변수(로컬 `.env`) 또는 GitHub Actions secrets가 필요합니다.
+값이 없으면 `@otw/notion-loader`가 빈 컬렉션으로 정상적으로 빌드되므로, 시크릿이 없어도 사이트 자체는 빌드에 실패하지 않습니다.
+
+직접적인 컨텐츠 기여는 [심윤섭](https://github.com/SimYunSup)이나 이슈를 통해 제안주시면 감사하겠습니다!
+
+## License
+
+MIT License

@@ -1,0 +1,17 @@
+{
+  "name": "@otw/crawler",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "deploy": "wrangler deploy -c ./wrangler.jsonc",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@cloudflare/puppeteer": "^1.1.0",
+    "cheerio": "^1.2.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260623.1",
+    "wrangler": "^4.104.0"
+  }
+}
