@@ -8,9 +8,13 @@ apps/tanstack-router/.tanstack/
 apps/kudzu/dist/
 apps/kudzu/.kudzu/
 packages/notion-content/dist/
-# local artifacts of scripts/build-stats.mjs and scripts/visual-diff.mjs
+# local artifacts of the scripts/ benches and e2e runs
 site/
 visual-diff/
+bench/
+origin-diff/
+test-results/
+playwright-report/
 # generated types
 apps/web/.astro/
 apps/react-router/.react-router/

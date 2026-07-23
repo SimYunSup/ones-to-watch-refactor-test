@@ -2,6 +2,7 @@ import { Link, useLoaderData } from "react-router";
 import { fetchNewsEntries } from "@otw/notion-content";
 import PostCard, { type PostCardData } from "../components/PostCard";
 import Search from "../components/Search";
+import HeroLogo from "../components/HeroLogo";
 
 const RECENT_COUNT = 8;
 
@@ -39,6 +40,7 @@ export default function Home() {
           <p className="hero-sub">주목할 만한 블로그를 모아두는 웹사이트</p>
           <p className="hero-fineprint">주 1회 발행 · 광고 없음 · 언제든 해지</p>
         </div>
+        <HeroLogo className="hero-logo" />
       </section>
 
       {/* Features */}

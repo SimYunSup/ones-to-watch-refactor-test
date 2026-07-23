@@ -11,9 +11,10 @@
     "@pickhealer/munja": "^0.1.0",
     "@tanstack/react-router": "^1.170.18",
     "@tanstack/react-start": "^1.168.32",
-    "@tanstack/start-static-server-functions": "^1.167.19",
+    "@tanstack/start-client-core": "^1.170.14",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "seroval": "^1.5.6"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

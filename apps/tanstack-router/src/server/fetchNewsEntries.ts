@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { staticFunctionMiddleware } from "@tanstack/start-static-server-functions";
+import { staticFunctionMiddleware } from "../lib/staticFunctionMiddleware";
 import { fetchNewsEntries as fetchNewsEntriesFromNotion } from "@otw/notion-content";
 
 // Route loaders in TanStack Start run isomorphically by default, so a
@@ -16,6 +16,9 @@ import { fetchNewsEntries as fetchNewsEntriesFromNotion } from "@otw/notion-cont
 // wasn't embedded in the current page) fetches that static JSON file
 // instead of trying to run server code in the browser — required here
 // because GitHub Pages serves this build with no application server.
+// Vendored (src/lib) rather than @tanstack/start-static-server-functions:
+// the upstream fetches the cache from the origin root, which 404s under a
+// project-page base path — see src/lib/staticFunctionMiddleware.ts.
 export const fetchNewsEntries = createServerFn({ method: "GET" })
   .middleware([staticFunctionMiddleware])
   .handler(async () => fetchNewsEntriesFromNotion());
