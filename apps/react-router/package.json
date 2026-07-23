@@ -4,10 +4,11 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "react-router dev",
-    "build": "react-router build"
+    "build": "node ./scripts/build-search-index.mjs && react-router build"
   },
   "dependencies": {
     "@otw/notion-content": "workspace:*",
+    "@pickhealer/munja": "^0.1.0",
     "@react-router/node": "^7.9.0",
     "isbot": "^5",
     "react": "^19.0.0",

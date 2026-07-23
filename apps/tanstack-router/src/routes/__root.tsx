@@ -7,6 +7,7 @@ import "../styles/global.css";
 import "../styles/home.css";
 import "../styles/list-page.css";
 import "../styles/content.css";
+import "../styles/search.css";
 
 export const Route = createRootRoute({
   head: () => ({

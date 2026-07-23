@@ -4,10 +4,11 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build"
+    "build": "node ./scripts/build-search-index.mjs && vite build"
   },
   "dependencies": {
     "@otw/notion-content": "workspace:*",
+    "@pickhealer/munja": "^0.1.0",
     "@tanstack/react-router": "^1.170.18",
     "@tanstack/react-start": "^1.168.32",
     "@tanstack/start-static-server-functions": "^1.167.19",

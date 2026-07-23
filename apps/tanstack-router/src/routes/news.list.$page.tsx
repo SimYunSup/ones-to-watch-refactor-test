@@ -1,5 +1,6 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import PostCard, { type PostCardData } from "../components/PostCard";
+import Search from "../components/Search";
 import { PAGE_SIZE } from "../lib/pagination";
 import { fetchNewsEntries } from "../server/fetchNewsEntries";
 
@@ -51,6 +52,10 @@ function NewsList() {
     <main className="archive">
       <p className="mono-eyebrow">// archive</p>
       <h1 className="archive-title">뉴스레터 아카이브</h1>
+
+      <div className="archive-search">
+        <Search />
+      </div>
 
       <div className="post-list">
         {cards.length > 0 ? (

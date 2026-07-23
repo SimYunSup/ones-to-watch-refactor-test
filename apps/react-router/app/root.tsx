@@ -15,6 +15,7 @@ import "./styles/global.css";
 import "./styles/home.css";
 import "./styles/list-page.css";
 import "./styles/content.css";
+import "./styles/search.css";
 
 const faviconHref = `${import.meta.env.BASE_URL}favicon.svg`;
 

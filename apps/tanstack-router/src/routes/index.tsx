@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import PostCard, { type PostCardData } from "../components/PostCard";
+import Search from "../components/Search";
 import { fetchNewsEntries } from "../server/fetchNewsEntries";
 
 const RECENT_COUNT = 8;
@@ -74,6 +75,9 @@ function Home() {
           <Link className="recent-all" to="/news/list/$page" params={{ page: "1" }}>
             전체 보기 →
           </Link>
+        </div>
+        <div className="recent-search">
+          <Search />
         </div>
         <div className="post-list">
           {cards.map((card) => (

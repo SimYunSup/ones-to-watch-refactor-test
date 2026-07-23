@@ -1,6 +1,7 @@
 import { Link, useLoaderData } from "react-router";
 import { fetchNewsEntries } from "@otw/notion-content";
 import PostCard, { type PostCardData } from "../components/PostCard";
+import Search from "../components/Search";
 
 const RECENT_COUNT = 8;
 
@@ -72,6 +73,9 @@ export default function Home() {
           <Link className="recent-all" to="/news/list/1">
             전체 보기 →
           </Link>
+        </div>
+        <div className="recent-search">
+          <Search />
         </div>
         <div className="post-list">
           {cards.map((card) => (

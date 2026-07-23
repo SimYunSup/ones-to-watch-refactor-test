@@ -10,6 +10,10 @@ const RECENT_COUNT = 8;
 // expressions as reactive-binding captures and rejects imported helpers,
 // so no siteUrl(...) call may appear inside the returned JSX.
 const ARCHIVE_URL = siteUrl("news/list/1");
+// Munja search is a vanilla ESM script (public/search.js, not compiled by
+// Kudzu) — see kudzu.config.mjs afterBuild for how index.bin/munja/ land in
+// dist/.
+const SEARCH_SCRIPT_URL = siteUrl("search.js");
 
 export const metadata = {
   title: "Ones To Watch for FrontEnd",
@@ -75,6 +79,34 @@ export default async function HomePage() {
               전체 보기 →
             </a>
           </div>
+          <div className="recent-search">
+            <div className="munja-search" data-munja>
+              <div className="munja-field">
+                <svg
+                  className="munja-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input
+                  className="munja-input"
+                  type="search"
+                  placeholder="뉴스레터 검색…"
+                  aria-label="뉴스레터 검색"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+              </div>
+              <ul className="munja-panel" role="listbox" aria-label="검색 결과" hidden></ul>
+            </div>
+          </div>
           <div className="post-list">
             {cards.map(card => (
               <PostCard key={card.id} post={card} />
@@ -83,6 +115,7 @@ export default async function HomePage() {
         </section>
       </main>
       <Footer />
+      <script type="module" src={SEARCH_SCRIPT_URL}></script>
     </>
   );
 }

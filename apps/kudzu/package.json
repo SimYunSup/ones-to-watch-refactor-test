@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "@kudzujs/core": "^0.5.2",
-    "@otw/notion-content": "workspace:*"
+    "@otw/notion-content": "workspace:*",
+    "@pickhealer/munja": "^0.1.0"
   },
   "devDependencies": {
     "typescript": "^5.9.0"

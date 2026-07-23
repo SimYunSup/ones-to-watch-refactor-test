@@ -7,6 +7,7 @@ import {
 import { fetchNewsEntries } from "@otw/notion-content";
 import PostCard, { type PostCardData } from "../components/PostCard";
 import { PAGE_SIZE } from "../lib/pagination";
+import Search from "../components/Search";
 
 interface NewsListLoaderData {
   page: number;
@@ -53,6 +54,10 @@ export default function NewsList() {
     <main className="archive">
       <p className="mono-eyebrow">// archive</p>
       <h1 className="archive-title">뉴스레터 아카이브</h1>
+
+      <div className="archive-search">
+        <Search />
+      </div>
 
       <div className="post-list">
         {cards.length > 0 ? (

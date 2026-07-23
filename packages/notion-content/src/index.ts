@@ -6,6 +6,13 @@ import { createProcessor } from "./processor.js";
 import type { NewsEntry } from "./types.js";
 
 export type { NewsEntry, NewsHeading } from "./types.js";
+export type { SearchDoc } from "./search.js";
+export {
+  htmlToText,
+  entriesToSearchDocs,
+  buildSearchIndexBytes,
+  writeSearchIndexFile,
+} from "./search.js";
 
 export interface FetchNewsEntriesOptions {
   auth?: string;

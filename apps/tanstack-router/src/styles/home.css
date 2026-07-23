@@ -87,6 +87,10 @@
   word-break: keep-all;
 }
 
+.recent-search {
+  margin-bottom: 20px;
+}
+
 /* Recent */
 .recent {
   max-width: 880px;
