@@ -2,6 +2,7 @@ import { fetchNewsEntries } from "@otw/notion-content";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import PostCard, { type PostCardData } from "../components/PostCard";
+import HeroLogo from "../components/HeroLogo";
 import { siteUrl } from "../lib/site";
 
 const RECENT_COUNT = 8;
@@ -50,6 +51,7 @@ export default async function HomePage() {
             <p className="hero-sub">주목할 만한 블로그를 모아두는 웹사이트</p>
             <p className="hero-fineprint">주 1회 발행 · 광고 없음 · 언제든 해지</p>
           </div>
+          <HeroLogo />
         </section>
 
         <section className="features">

@@ -51,6 +51,18 @@
   color: var(--muted);
   margin: 14px 0 0;
 }
+.hero-logo {
+  width: 220px;
+  height: 220px;
+  flex-shrink: 0;
+  color: var(--accent);
+  opacity: 0.9;
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+.hero-logo:hover {
+  filter: drop-shadow(0 8px 24px rgba(79, 70, 229, 0.45));
+  transform: translateY(-4px);
+}
 
 /* Features */
 .features {
@@ -126,6 +138,10 @@
     align-items: flex-start;
     padding: 64px 24px 48px;
     gap: 28px;
+  }
+  .hero-logo {
+    width: 120px;
+    height: 120px;
   }
   .hero-title {
     font-size: 40px;
