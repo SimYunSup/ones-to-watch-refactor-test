@@ -77,7 +77,10 @@ writeFileSync(path.join(siteDir, ".nojekyll"), "");
 // index (GIT_INDEX_FILE) with --work-tree pointed at site/, hash it into a
 // tree object, wrap it in a parentless commit, point the branch at it, push.
 // site/ is gitignored on the source branch, hence the explicit `add -f`.
-const tmpIndex = path.join(repoRoot, ".git", "deploy-pages-index");
+// `.git` may be a file (worktree gitdir pointer), not a directory, so resolve
+// the real git dir instead of hardcoding path.join(repoRoot, ".git", ...).
+const gitDir = capture("git", ["rev-parse", "--absolute-git-dir"]);
+const tmpIndex = path.join(gitDir, "deploy-pages-index");
 rmSync(tmpIndex, { force: true });
 const snapshotEnv = { GIT_INDEX_FILE: tmpIndex };
 function captureWithEnv(cmd, args, env) {

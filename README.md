@@ -23,7 +23,7 @@
 - `apps/next-pages` — Next.js Pages Router(output:export) 리팩토링. `/next-pages/`.
 - `apps/crawler` — 뉴스레터 썸네일/북마크 크롤링을 담당하는 Cloudflare Queue 워커.
 - `packages/notion-loader` — Notion을 Astro Content Layer로 불러오는 로더 패키지(`@otw/notion-loader`).
-- `packages/notion-content` — 프레임워크 중립 Notion 콘텐츠 페처(`@otw/notion-content`). astro를 제외한 모든 변형이 빌드 타임에 사용합니다. 커버·본문 이미지는 의도적으로 제외합니다(아래 결함 6 참고). (Framework-neutral fetcher; cover/body images intentionally dropped.)
+- `packages/notion-content` — 프레임워크 중립 Notion 콘텐츠 페처(`@otw/notion-content`). astro를 제외한 모든 변형이 빌드 타임에 사용합니다. (Framework-neutral fetcher used by every variant except astro.)
 
 ## 빌드 벤치마크 (Build Benchmark)
 
@@ -34,18 +34,18 @@
 <!-- build-stats:start -->
 | 변형 (Variant) | 특징 (Type) | 빌드 시간(s) (Build) | 총 출력 크기 (Total) | JS 크기 (JS) | 파일 수 (Files) |
 | --- | --- | --- | --- | --- | --- |
-| Astro 7.1.3 | SSG 특화 / SSG-focused | - | 769.7 KB | 99.9 KB | 24 |
-| React Router 8.3.0 | SSG 지원 / SSG-capable | - | 596.4 KB | 321.7 KB | 18 |
-| TanStack 1.168.32 | SSG 지원 / SSG-capable | - | 602.0 KB | 333.4 KB | 14 |
-| Kudzu 0.5.2 | SSG 특화 / SSG-focused | - | 285.4 KB | 15.9 KB | 13 |
-| Hugo 0.161.0 | SSG 특화 / SSG-focused | - | 285.0 KB | 14.8 KB | 10 |
-| VitePress 1.6.4 | SSG 특화 / SSG-focused | - | 380.9 KB | 112.5 KB | 18 |
-| Docusaurus 3.10.2 | SSG 특화 / SSG-focused | - | 557.9 KB | 288.4 KB | 18 |
-| Eleventy 3.1.6 | SSG 특화 / SSG-focused | - | 285.3 KB | 15.0 KB | 10 |
-| Next.js App Router 16.2.11 | SSG 지원 / SSG-capable | - | 1.0 MB | 637.1 KB | 55 |
-| Next.js Pages Router 16.2.11 | SSG 지원 / SSG-capable | - | 802.8 KB | 528.9 KB | 38 |
+| Astro 7.1.3 | SSG 특화 / SSG-focused | 8.4 | 5.1 MB | 99.9 KB | 157 |
+| React Router 8.3.0 | SSG 지원 / SSG-capable | 3.3 | 6.8 MB | 323.4 KB | 286 |
+| TanStack Start 1.168.32 | SSG 지원 / SSG-capable | 7.9 | 6.5 MB | 333.4 KB | 147 |
+| Kudzu 0.5.2 | SSG 특화 / SSG-focused | 0.9 | 2.6 MB | 15.9 KB | 146 |
+| Hugo 0.161.0 | SSG 특화 / SSG-focused | 1.1 | 2.6 MB | 14.8 KB | 143 |
+| VitePress 1.6.4 | SSG 특화 / SSG-focused | 2.3 | 8.5 MB | 4.6 MB | 417 |
+| Docusaurus 3.10.2 | SSG 특화 / SSG-focused | 4.3 | 5.0 MB | 2.3 MB | 285 |
+| Eleventy 3.1.6 | SSG 특화 / SSG-focused | 1.0 | 2.6 MB | 15.0 KB | 143 |
+| Next.js App Router 16.2.11 | SSG 지원 / SSG-capable | 4.8 | 14.5 MB | 637.1 KB | 1375 |
+| Next.js Pages Router 16.2.11 | SSG 지원 / SSG-capable | 4.1 | 6.5 MB | 528.9 KB | 304 |
 
-_로컬에서 `pnpm run build:stats`로 측정(수동 갱신), 콘텐츠 양·머신에 따라 변동. (Measured locally via `pnpm run build:stats`; varies with content volume and machine.) 측정 시각(Measured at): 2026-07-23T18:18:33.973Z_
+_로컬에서 `pnpm run build:stats`로 측정(수동 갱신), 콘텐츠 양·머신에 따라 변동. (Measured locally via `pnpm run build:stats`; varies with content volume and machine.) 측정 시각(Measured at): 2026-07-23T19:20:09.406Z_
 <!-- build-stats:end -->
 
 ### CI 측정 스냅숏 (CI snapshot, 참고)
@@ -75,9 +75,7 @@ _2026-07-23 측정 스냅숏(수동 유지, 당시 4개 변형·React Router v7 
    Pages Router(`getStaticPaths` → `paths: []`, `fallback: false`)는 빈 컬렉션을 그대로 허용하지만, App Router는 정적 export에서 동적 라우트가 최소 1개 경로를 내놓지 못하면 빌드가 죽습니다. 이 레포는 빈 컬렉션일 때 sentinel 경로(`_none`) + `dynamicParams = false` + `notFound()` 조합으로 방어합니다(`apps/next-app/src/app/news/post/[id]/page.tsx`). 같은 프레임워크의 두 라우터가 같은 상황에서 다르게 동작하는 사례. (App Router fails a static export build when a dynamic route yields zero params; Pages Router accepts it.)
 5. **VitePress — 동적 라우트는 디렉터리형 pretty URL을 만들 수 없음**
    `[page].md` 동적 라우트는 `cleanUrls` 설정과 무관하게 항상 평면 `<param>.html` 파일로만 출력됩니다(`/news/list/1/index.html` 형태 불가). GitHub Pages가 확장자 없는 요청을 `.html`로 서빙해 주기 때문에 `cleanUrls: true`로 다른 변형과 동등한 URL 계약을 맞췄지만, 트레일링 슬래시 유무는 다릅니다. (VitePress dynamic routes always emit flat `<param>.html`; pretty directory URLs are impossible.)
-6. **Notion `file` 이미지는 만료되는 서명 URL — 클론에서는 이미지를 제외**
-   Notion `type:"file"` 커버/본문 이미지는 ~1시간 만료되는 S3 서명 URL입니다. 라이브 원본은 자체 이미지 CDN(`cdn-otw.ethansup.net/cdn-cgi/image/...`)으로 프록시·리사이즈해 이를 우회하지만, 이 정적 클론들은 CDN이 없어 배포 직후부터 이미지가 깨지고 브라우저가 만료된 S3로 실패하는 외부 요청을 냅니다. 그래서 `@otw/notion-content`는 커버(`coverUrl=null`)와 본문 이미지 블록을 **빌드 타임에 제외**합니다 — 출력에 원격 이미지 fetch가 0이 되고, 소비처는 이미 `coverUrl` 조건부라 플레이스홀더로 정상 렌더됩니다. astro 변형은 자체 `@otw/notion-loader`를 쓰므로 영향받지 않습니다. (Notion `file` images are ~1h signed S3 URLs; clones drop them at build time to avoid broken images and failing runtime fetches.)
-7. **Docusaurus — 커스텀 플러그인의 `addRoute` 경로는 baseUrl-프리픽스여야 함**
+6. **Docusaurus — 커스텀 플러그인의 `addRoute` 경로는 baseUrl-프리픽스여야 함**
    `<BrowserRouter>`가 basename 없이 마운트돼(코어 `clientEntry.js`) 클라이언트는 baseUrl 포함 전체 URL로 매칭합니다. 플러그인이 언프리픽스 경로(`/`, `/news/list/1`)로 `addRoute`하면 SSG(StaticRouter 직접 구동)는 정상이지만 하이드레이션 시 아무 라우트도 안 맞아 catch-all `@theme/NotFound`로 폴백 → React #418. `normalizeUrl([baseUrl, path])` 프리픽스로 등록해야 합니다(코어 콘텐츠 플러그인·`useBaseUrl`과 동일). (Docusaurus custom-plugin routes must be baseUrl-prefixed; unprefixed paths hydrate to the 404 route.)
 
 ## 검증 도구 (Verification tools, 로컬 전용)

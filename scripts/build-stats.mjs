@@ -64,7 +64,7 @@ const variants = [
     kind: SSG_CAPABLE,
   },
   {
-    label: "TanStack",
+    label: "TanStack Start",
     pkg: "@otw/web-tanstack",
     appDir: "apps/tanstack-router",
     versionDep: "@tanstack/react-start",
