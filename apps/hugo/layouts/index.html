@@ -1,0 +1,57 @@
+{{/* Home page ("/"). Ported from apps/kudzu/src/pages/index.tsx. */}}
+{{ define "main" }}
+<main class="home">
+  <section class="hero">
+    <div class="hero-text">
+      <p class="mono-eyebrow hero-eyebrow">// weekly frontend newsletter</p>
+      <h1 class="hero-title">
+        Ones To Watch
+        <br />
+        for FrontEnd
+      </h1>
+      <p class="hero-sub">주목할 만한 블로그를 모아두는 웹사이트</p>
+      <p class="hero-fineprint">주 1회 발행 · 광고 없음 · 언제든 해지</p>
+    </div>
+    {{ partial "hero-logo.html" . }}
+  </section>
+
+  <section class="features">
+    <div class="features-inner">
+      <div class="feature">
+        <p class="feature-num">01</p>
+        <h3 class="feature-title">Deep Insights</h3>
+        <p class="feature-desc">기술적인 깊이가 있거나 방향성을 고민하게 만드는 글</p>
+      </div>
+      <div class="feature">
+        <p class="feature-num">02</p>
+        <h3 class="feature-title">Curated Archive</h3>
+        <p class="feature-desc">주 1회 발행되는 프론트엔드 아카이브</p>
+      </div>
+      <div class="feature">
+        <p class="feature-num">03</p>
+        <h3 class="feature-title">Developer Focused</h3>
+        <p class="feature-desc">프론트엔드 개발자에게 영감을 주는 인사이트</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="recent">
+    <div class="recent-head">
+      <h2 class="recent-title">최근 뉴스레터</h2>
+      <a class="recent-all" href="{{ "news/list/1/" | relURL }}">전체 보기 →</a>
+    </div>
+    <div class="recent-search">
+      {{ partial "search-box.html" . }}
+    </div>
+    <div class="post-list">
+      {{ range first 8 site.Data.news }}
+        {{ partial "post-card.html" (dict "entry" . "href" (printf "news/post/%s/" .id | relURL)) }}
+      {{ end }}
+    </div>
+  </section>
+</main>
+{{ end }}
+
+{{ define "extra_head" }}
+<script type="module" src="{{ "search.js" | relURL }}"></script>
+{{ end }}

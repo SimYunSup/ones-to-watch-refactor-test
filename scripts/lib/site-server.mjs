@@ -15,7 +15,7 @@ export const BASE_PATH = "/ones-to-watch-refactor-test";
 
 // astro is intentionally listed first: several consumers (visual-diff's
 // BASELINE_VARIANT) treat it as the reference variant, and the remaining
-// three are compared/reported against it in this same order.
+// nine are compared/reported against it in this same order.
 export const VARIANTS = [
   {
     key: "astro",
@@ -38,6 +38,36 @@ export const VARIANTS = [
     key: "kudzu",
     label: "Kudzu",
     paths: { home: "/kudzu/", archive: "/kudzu/news/list/1" },
+  },
+  {
+    key: "hugo",
+    label: "Hugo",
+    paths: { home: "/hugo/", archive: "/hugo/news/list/1" },
+  },
+  {
+    key: "vitepress",
+    label: "VitePress",
+    paths: { home: "/vitepress/", archive: "/vitepress/news/list/1" },
+  },
+  {
+    key: "docusaurus",
+    label: "Docusaurus",
+    paths: { home: "/docusaurus/", archive: "/docusaurus/news/list/1" },
+  },
+  {
+    key: "eleventy",
+    label: "Eleventy",
+    paths: { home: "/eleventy/", archive: "/eleventy/news/list/1" },
+  },
+  {
+    key: "next-app",
+    label: "Next.js App Router",
+    paths: { home: "/next-app/", archive: "/next-app/news/list/1" },
+  },
+  {
+    key: "next-pages",
+    label: "Next.js Pages Router",
+    paths: { home: "/next-pages/", archive: "/next-pages/news/list/1" },
   },
 ];
 
@@ -66,10 +96,10 @@ export const MIME_TYPES = {
 };
 
 /**
- * Rebuild site/ from the four variant build outputs, replicating the
- * "Assemble Pages artifact" step in .github/workflows/deploy.yml exactly
- * (including the react-router two-step merge + cleanup) via node:fs instead
- * of shell `cp -R`.
+ * Rebuild site/ from the ten variant build outputs (including the
+ * react-router two-step merge + cleanup) via node:fs. This is the single
+ * source of truth for the Pages artifact layout — scripts/deploy-pages.mjs
+ * publishes exactly what this assembles.
  *
  * @param {string} repoRoot absolute path to the monorepo root
  * @param {string} siteDir absolute path to assemble the Pages artifact into
@@ -77,15 +107,23 @@ export const MIME_TYPES = {
  */
 export function assembleSite(repoRoot, siteDir, opts = {}) {
   const toolName = opts.toolName ?? "site-server";
+  // Straight `cp -R <dist>/. site/<key>/` sources. react-router is special
+  // (below): its export nests HTML under the basename inside build/client.
   const distSources = {
     astro: path.join(repoRoot, "apps/web/dist"),
-    reactRouterClient: path.join(repoRoot, "apps/react-router/build/client"),
     tanstack: path.join(repoRoot, "apps/tanstack-router/dist/client"),
     kudzu: path.join(repoRoot, "apps/kudzu/dist"),
+    hugo: path.join(repoRoot, "apps/hugo/public"),
+    vitepress: path.join(repoRoot, "apps/vitepress/.vitepress/dist"),
+    docusaurus: path.join(repoRoot, "apps/docusaurus/build"),
+    eleventy: path.join(repoRoot, "apps/eleventy/_site"),
+    "next-app": path.join(repoRoot, "apps/next-app/out"),
+    "next-pages": path.join(repoRoot, "apps/next-pages/out"),
   };
+  const reactRouterClient = path.join(repoRoot, "apps/react-router/build/client");
   const landingDir = path.join(repoRoot, "landing");
 
-  for (const [name, dir] of Object.entries({ ...distSources, landing: landingDir })) {
+  for (const [name, dir] of Object.entries({ ...distSources, reactRouterClient, landing: landingDir })) {
     if (!existsSync(dir)) {
       console.error(
         `${toolName}: missing build output for ${name} at ${dir}. Run \`pnpm run build:all\` first, or pass --site <already-assembled-dir>.`,
@@ -97,31 +135,26 @@ export function assembleSite(repoRoot, siteDir, opts = {}) {
   rmSync(siteDir, { recursive: true, force: true });
   mkdirSync(siteDir, { recursive: true });
 
-  // Root: static landing hub linking to the four framework variants.
+  // Root: static landing hub linking to the framework variants.
   cpSync(landingDir, siteDir, { recursive: true });
 
-  mkdirSync(path.join(siteDir, "astro"), { recursive: true });
-  cpSync(distSources.astro, path.join(siteDir, "astro"), { recursive: true });
+  for (const [key, dir] of Object.entries(distSources)) {
+    mkdirSync(path.join(siteDir, key), { recursive: true });
+    cpSync(dir, path.join(siteDir, key), { recursive: true });
+  }
 
   // react-router emits HTML under its basename inside build/client; merge
   // assets (root) + pages (base-prefixed dir) into site/react-router, then
-  // drop the now-redundant nested basename tree — same two-step copy +
-  // cleanup as deploy.yml.
+  // drop the now-redundant nested basename tree.
   const reactRouterDir = path.join(siteDir, "react-router");
   mkdirSync(reactRouterDir, { recursive: true });
-  cpSync(distSources.reactRouterClient, reactRouterDir, { recursive: true });
+  cpSync(reactRouterClient, reactRouterDir, { recursive: true });
   cpSync(
-    path.join(distSources.reactRouterClient, "ones-to-watch-refactor-test", "react-router"),
+    path.join(reactRouterClient, "ones-to-watch-refactor-test", "react-router"),
     reactRouterDir,
     { recursive: true },
   );
   rmSync(path.join(reactRouterDir, "ones-to-watch-refactor-test"), { recursive: true, force: true });
-
-  mkdirSync(path.join(siteDir, "tanstack"), { recursive: true });
-  cpSync(distSources.tanstack, path.join(siteDir, "tanstack"), { recursive: true });
-
-  mkdirSync(path.join(siteDir, "kudzu"), { recursive: true });
-  cpSync(distSources.kudzu, path.join(siteDir, "kudzu"), { recursive: true });
 
   console.log(`${toolName}: assembled site at ${siteDir}`);
   return siteDir;

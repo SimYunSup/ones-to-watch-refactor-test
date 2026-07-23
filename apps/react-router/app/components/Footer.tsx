@@ -1,4 +1,4 @@
-// Every static variant links to the other three so readers can hop between
+// Every static variant links to the other nine so readers can hop between
 // framework implementations of the same content.
 const VARIANTS = [
   {
@@ -20,6 +20,36 @@ const VARIANTS = [
     key: "kudzu",
     label: "kudzu",
     href: "https://simyunsup.github.io/ones-to-watch-refactor-test/kudzu/",
+  },
+  {
+    key: "hugo",
+    label: "hugo",
+    href: "https://simyunsup.github.io/ones-to-watch-refactor-test/hugo/",
+  },
+  {
+    key: "vitepress",
+    label: "vitepress",
+    href: "https://simyunsup.github.io/ones-to-watch-refactor-test/vitepress/",
+  },
+  {
+    key: "docusaurus",
+    label: "docusaurus",
+    href: "https://simyunsup.github.io/ones-to-watch-refactor-test/docusaurus/",
+  },
+  {
+    key: "eleventy",
+    label: "eleventy",
+    href: "https://simyunsup.github.io/ones-to-watch-refactor-test/eleventy/",
+  },
+  {
+    key: "next-app",
+    label: "next-app",
+    href: "https://simyunsup.github.io/ones-to-watch-refactor-test/next-app/",
+  },
+  {
+    key: "next-pages",
+    label: "next-pages",
+    href: "https://simyunsup.github.io/ones-to-watch-refactor-test/next-pages/",
   },
 ] as const;
 

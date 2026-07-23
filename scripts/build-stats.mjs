@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // Measures clean-build wall-clock time and static output size for each of
-// the four framework variants (astro/react-router/tanstack/kudzu), then
-// rewrites the `<!-- build-stats:start -->` … `<!-- build-stats:end -->`
-// section of the root README with a markdown table. Runs in CI
-// (see .github/workflows/*) and locally via `pnpm run build:stats`.
+// the ten framework variants, labelling every row with the framework's
+// installed version, then rewrites the `<!-- build-stats:start -->` …
+// `<!-- build-stats:end -->` section of the root README with a markdown
+// table. Run locally via `pnpm run build:stats`.
 //
 // Pure Node — no external dependencies.
 import { spawnSync } from "node:child_process";
-import { existsSync, readdirSync, rmSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -23,19 +23,96 @@ const skipBuild = process.argv.includes("--skip-build");
 // built once up front and excluded from the measured table.
 const contentPackage = "@otw/notion-content";
 
+// `kind` classifies each variant for the README table: "SSG 특화" = the tool
+// exists to emit static sites; "SSG 지원" = a general app framework that can
+// also export statically. Korean/English kept together so the bilingual
+// README columns stay in sync from one source.
+const SSG_FOCUSED = { ko: "SSG 특화", en: "SSG-focused" };
+const SSG_CAPABLE = { ko: "SSG 지원", en: "SSG-capable" };
+
+// Reads the installed version of `dep` as resolved for the app at `appDir`
+// (its own node_modules first, then the workspace root), so the table pins
+// the exact framework version each variant actually built with — not the
+// package.json range. Returns null if it can't be resolved.
+function versionOf(appDir, dep) {
+  const candidates = [
+    path.join(repoRoot, appDir, "node_modules", dep, "package.json"),
+    path.join(repoRoot, "node_modules", dep, "package.json"),
+  ];
+  for (const p of candidates) {
+    if (existsSync(p)) {
+      try {
+        return JSON.parse(readFileSync(p, "utf8")).version;
+      } catch {
+        // fall through to next candidate
+      }
+    }
+  }
+  return null;
+}
+
+// `versionDep` is the framework npm package whose installed version labels the
+// row (e.g. "Astro 7.0.2"); `appDir` locates its install.
 const variants = [
-  { label: "Astro", pkg: "@otw/web", outDir: path.join(repoRoot, "apps/web/dist") },
+  { label: "Astro", pkg: "@otw/web", appDir: "apps/web", versionDep: "astro", outDir: path.join(repoRoot, "apps/web/dist"), kind: SSG_FOCUSED },
   {
     label: "React Router",
     pkg: "@otw/web-react-router",
+    appDir: "apps/react-router",
+    versionDep: "react-router",
     outDir: path.join(repoRoot, "apps/react-router/build/client"),
+    kind: SSG_CAPABLE,
   },
   {
     label: "TanStack",
     pkg: "@otw/web-tanstack",
+    appDir: "apps/tanstack-router",
+    versionDep: "@tanstack/react-start",
     outDir: path.join(repoRoot, "apps/tanstack-router/dist/client"),
+    kind: SSG_CAPABLE,
   },
-  { label: "Kudzu", pkg: "@otw/web-kudzu", outDir: path.join(repoRoot, "apps/kudzu/dist") },
+  { label: "Kudzu", pkg: "@otw/web-kudzu", appDir: "apps/kudzu", versionDep: "@kudzujs/core", outDir: path.join(repoRoot, "apps/kudzu/dist"), kind: SSG_FOCUSED },
+  { label: "Hugo", pkg: "@otw/web-hugo", appDir: "apps/hugo", versionDep: "hugo-bin", outDir: path.join(repoRoot, "apps/hugo/public"), kind: SSG_FOCUSED },
+  {
+    label: "VitePress",
+    pkg: "@otw/web-vitepress",
+    appDir: "apps/vitepress",
+    versionDep: "vitepress",
+    outDir: path.join(repoRoot, "apps/vitepress/.vitepress/dist"),
+    kind: SSG_FOCUSED,
+  },
+  {
+    label: "Docusaurus",
+    pkg: "@otw/web-docusaurus",
+    appDir: "apps/docusaurus",
+    versionDep: "@docusaurus/core",
+    outDir: path.join(repoRoot, "apps/docusaurus/build"),
+    kind: SSG_FOCUSED,
+  },
+  {
+    label: "Eleventy",
+    pkg: "@otw/web-eleventy",
+    appDir: "apps/eleventy",
+    versionDep: "@11ty/eleventy",
+    outDir: path.join(repoRoot, "apps/eleventy/_site"),
+    kind: SSG_FOCUSED,
+  },
+  {
+    label: "Next.js App Router",
+    pkg: "@otw/web-next-app",
+    appDir: "apps/next-app",
+    versionDep: "next",
+    outDir: path.join(repoRoot, "apps/next-app/out"),
+    kind: SSG_CAPABLE,
+  },
+  {
+    label: "Next.js Pages Router",
+    pkg: "@otw/web-next-pages",
+    appDir: "apps/next-pages",
+    versionDep: "next",
+    outDir: path.join(repoRoot, "apps/next-pages/out"),
+    kind: SSG_CAPABLE,
+  },
 ];
 
 /** Recursively walk a directory, returning { totalBytes, jsBytes, fileCount }. */
@@ -117,19 +194,22 @@ async function main() {
     rows.push({ variant, ok: true, seconds, stats });
   }
 
-  const header = "| 변형 | 빌드 시간(s) | 총 출력 크기 | JS 크기 | 파일 수 |";
-  const divider = "| --- | --- | --- | --- | --- |";
+  const header =
+    "| 변형 (Variant) | 특징 (Type) | 빌드 시간(s) (Build) | 총 출력 크기 (Total) | JS 크기 (JS) | 파일 수 (Files) |";
+  const divider = "| --- | --- | --- | --- | --- | --- |";
   const tableRows = rows.map(({ variant, ok, seconds, stats }) => {
-    if (!ok) {
-      const time = seconds === null ? "-" : seconds.toFixed(1);
-      return `| ${variant.label} | ${time} | ❌ | ❌ | ❌ |`;
-    }
+    const version = versionOf(variant.appDir, variant.versionDep);
+    const name = version ? `${variant.label} ${version}` : variant.label;
+    const kind = `${variant.kind.ko} / ${variant.kind.en}`;
     const time = seconds === null ? "-" : seconds.toFixed(1);
-    return `| ${variant.label} | ${time} | ${formatBytes(stats.totalBytes)} | ${formatBytes(stats.jsBytes)} | ${stats.fileCount} |`;
+    if (!ok) {
+      return `| ${name} | ${kind} | ${time} | ❌ | ❌ | ❌ |`;
+    }
+    return `| ${name} | ${kind} | ${time} | ${formatBytes(stats.totalBytes)} | ${formatBytes(stats.jsBytes)} | ${stats.fileCount} |`;
   });
 
   const measuredAt = new Date().toISOString();
-  const footnote = `_로컬에서 \`pnpm run build:stats\`로 측정(수동 갱신), 콘텐츠 양·머신에 따라 변동. 측정 시각: ${measuredAt}_`;
+  const footnote = `_로컬에서 \`pnpm run build:stats\`로 측정(수동 갱신), 콘텐츠 양·머신에 따라 변동. (Measured locally via \`pnpm run build:stats\`; varies with content volume and machine.) 측정 시각(Measured at): ${measuredAt}_`;
 
   const table = [header, divider, ...tableRows, "", footnote].join("\n");
 

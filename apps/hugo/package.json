@@ -1,0 +1,15 @@
+{
+  "name": "@otw/web-hugo",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "node ./scripts/prepare-data.mjs && hugo --minify --logLevel info"
+  },
+  "dependencies": {
+    "@otw/notion-content": "workspace:*",
+    "@pickhealer/munja": "^0.1.0"
+  },
+  "devDependencies": {
+    "hugo-bin": "^0.161.0"
+  }
+}

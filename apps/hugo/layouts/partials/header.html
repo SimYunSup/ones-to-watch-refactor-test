@@ -1,0 +1,11 @@
+{{/*
+  Ported from apps/kudzu/src/components/Header.tsx. Hugo's relURL already
+  prefixes internal links with baseURL's /ones-to-watch-refactor-test/hugo/
+  path, so — unlike kudzu — no hand-rolled BASE constant is needed here.
+*/}}
+<header class="header">
+  <div class="container">
+    <a class="logo" href="{{ "/" | relURL }}">OTW <span class="logo-sub">for</span> FE</a>
+    <a class="link" href="{{ "news/list/1/" | relURL }}">Archive</a>
+  </div>
+</header>

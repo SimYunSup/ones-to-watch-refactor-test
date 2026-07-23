@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ones To Watch for FrontEnd — Framework Variants</title>
-  <meta name="description" content="같은 뉴스레터 사이트를 네 가지 프레임워크로 각각 빌드한 리팩토링 실험장입니다." />
+  <meta name="description" content="같은 뉴스레터 사이트를 열 가지 프레임워크로 각각 빌드한 리팩토링 실험장입니다." />
   <link rel="icon" href="/ones-to-watch-refactor-test/astro/favicon.svg" type="image/svg+xml" />
   <style>
     /* Same editorial token system as the variant apps (apps/web global.css). */
@@ -111,10 +111,10 @@
 </head>
 <body>
   <main>
-    <p class="mono-eyebrow">// one newsletter, four frameworks</p>
+    <p class="mono-eyebrow">// one newsletter, ten frameworks</p>
     <h1>Ones To Watch<br />for FrontEnd</h1>
     <p class="sub">
-      같은 Notion 기반 뉴스레터 사이트를 네 가지 프레임워크로 각각 정적 빌드한
+      같은 Notion 기반 뉴스레터 사이트를 열 가지 프레임워크로 각각 정적 빌드한
       리팩토링 실험장입니다. 아래에서 변형을 골라 들어가세요.
     </p>
     <ul class="variants">
@@ -127,7 +127,7 @@
       <li>
         <a class="variant" href="/ones-to-watch-refactor-test/react-router/">
           <span class="name">react-router</span>
-          <span class="desc">React Router v7 framework mode, ssr:false + prerender</span>
+          <span class="desc">React Router v8 framework mode, ssr:false + prerender</span>
         </a>
       </li>
       <li>
@@ -140,6 +140,42 @@
         <a class="variant" href="/ones-to-watch-refactor-test/kudzu/">
           <span class="name">kudzu</span>
           <span class="desc">HTML-first TSX 실험 프레임워크, getStaticPaths 정적 출력</span>
+        </a>
+      </li>
+      <li>
+        <a class="variant" href="/ones-to-watch-refactor-test/hugo/">
+          <span class="name">hugo</span>
+          <span class="desc">Go 바이너리 SSG — 데이터 파일 + Go 템플릿, 비-Node 툴체인</span>
+        </a>
+      </li>
+      <li>
+        <a class="variant" href="/ones-to-watch-refactor-test/vitepress/">
+          <span class="name">vitepress</span>
+          <span class="desc">Vite + Vue 커스텀 테마, 동적 라우트 paths 로더</span>
+        </a>
+      </li>
+      <li>
+        <a class="variant" href="/ones-to-watch-refactor-test/docusaurus/">
+          <span class="name">docusaurus</span>
+          <span class="desc">React 문서 프레임워크 — 커스텀 플러그인으로 라우트 생성</span>
+        </a>
+      </li>
+      <li>
+        <a class="variant" href="/ones-to-watch-refactor-test/eleventy/">
+          <span class="name">eleventy</span>
+          <span class="desc">11ty v3 — Nunjucks 템플릿 + 전역 데이터 파일, 클라이언트 JS 0</span>
+        </a>
+      </li>
+      <li>
+        <a class="variant" href="/ones-to-watch-refactor-test/next-app/">
+          <span class="name">next-app</span>
+          <span class="desc">Next.js App Router, output:export + generateStaticParams</span>
+        </a>
+      </li>
+      <li>
+        <a class="variant" href="/ones-to-watch-refactor-test/next-pages/">
+          <span class="name">next-pages</span>
+          <span class="desc">Next.js Pages Router, output:export + getStaticPaths</span>
         </a>
       </li>
     </ul>

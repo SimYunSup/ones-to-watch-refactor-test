@@ -1,0 +1,24 @@
+---
+pagination:
+  data: news
+  size: 1
+  alias: post
+permalink: "/news/post/{{ post.id }}/"
+layout: base.njk
+eleventyComputed:
+  title: "{{ post.title }} | OTW for FE"
+---
+<main class="post-page">
+  {%- if post.coverUrl %}
+  <div class="image-container">
+    <img src="{{ post.coverUrl }}" alt="" />
+  </div>
+  {%- endif %}
+  <h1 class="title">{{ post.title }}</h1>
+  {%- if post.date %}
+  <div class="description">
+    <p>{{ post.date | koDate }}</p>
+  </div>
+  {%- endif %}
+  <article class="markdown-body">{{ post.html | safe }}</article>
+</main>

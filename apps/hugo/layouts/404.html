@@ -1,0 +1,25 @@
+{{/*
+  Self-contained (no baseof block) rather than defining "main": Hugo's 404
+  kind is rendered without base-template composition by default when the
+  template already contains a full <html> document, which keeps this page
+  from depending on the block/baseof lookup quirks that only matter for the
+  html output format's regular page/home/section kinds.
+*/}}
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>페이지를 찾을 수 없습니다 | OTW for FE</title>
+    <link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml" />
+    <link rel="stylesheet" href="{{ "style.css" | relURL }}" />
+  </head>
+  <body>
+    {{ partial "header.html" . }}
+    <main class="archive">
+      <p class="mono-eyebrow">// 404</p>
+      <h1 class="archive-title">페이지를 찾을 수 없습니다</h1>
+    </main>
+    {{ partial "footer.html" . }}
+  </body>
+</html>

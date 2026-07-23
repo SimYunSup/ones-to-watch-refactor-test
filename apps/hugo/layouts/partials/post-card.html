@@ -1,0 +1,18 @@
+{{/*
+  Ported from apps/kudzu/src/components/PostCard.tsx. Expects a dict with
+  "entry" (a site.Data.news element: id/title/date/coverUrl/html) and
+  "href" (a pre-built relURL to the post page).
+*/}}
+{{ $entry := .entry }}
+{{ $dateLabel := "" }}
+{{ with $entry.date }}
+  {{/* ko-KR Intl.DateTimeFormat renders e.g. "2024. 3. 5." (no zero-padding) — "2006. 1. 2." is the matching Go reference-time layout. */}}
+  {{ $dateLabel = (time.AsTime .).Format "2006. 1. 2." }}
+{{ end }}
+<a class="row" href="{{ .href }}">
+  <span class="thumb">
+    {{ if $entry.coverUrl }}<img src="{{ $entry.coverUrl }}" alt="" loading="lazy" />{{ else }}thumbnail{{ end }}
+  </span>
+  <span class="title">{{ $entry.title }}</span>
+  {{ if $dateLabel }}<span class="date">{{ $dateLabel }}</span>{{ end }}
+</a>

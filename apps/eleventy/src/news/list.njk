@@ -1,0 +1,42 @@
+---
+pagination:
+  data: newsPages
+  size: 1
+  alias: pageData
+permalink: "/news/list/{{ pageData.pageNumber }}/"
+title: "뉴스레터 아카이브 | OTW for FE"
+---
+{%- import "post-card.njk" as cards -%}
+<main class="archive">
+  <p class="mono-eyebrow">// archive</p>
+  <h1 class="archive-title">뉴스레터 아카이브</h1>
+
+  <div class="archive-search">
+    {%- include "search-box.njk" %}
+  </div>
+
+  <div class="post-list">
+    {%- if pageData.items.length > 0 %}
+    {%- for entry in pageData.items %}
+    {{ cards.postCard(entry, site.base) }}
+    {%- endfor %}
+    {%- else %}
+    <p class="archive-empty">게시물이 없습니다</p>
+    {%- endif %}
+  </div>
+
+  <nav class="pager">
+    {%- if pageData.hasPrev %}
+    <a class="pager-btn" href="{{ site.base }}/news/list/{{ pageData.pageNumber - 1 }}/"> ← 이전 </a>
+    {%- else %}
+    <span></span>
+    {%- endif %}
+    <span class="pager-current">{{ pageData.pageNumber }}</span>
+    {%- if pageData.hasNext %}
+    <a class="pager-btn" href="{{ site.base }}/news/list/{{ pageData.pageNumber + 1 }}/"> 다음 → </a>
+    {%- else %}
+    <span></span>
+    {%- endif %}
+  </nav>
+</main>
+<script type="module" src="{{ site.base }}/search.js"></script>
