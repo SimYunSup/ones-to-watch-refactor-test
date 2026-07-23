@@ -13,7 +13,6 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
-const readmePath = path.join(repoRoot, "README.md");
 const startMarker = "<!-- build-stats:start -->";
 const endMarker = "<!-- build-stats:end -->";
 
@@ -52,32 +51,41 @@ function versionOf(appDir, dep) {
 }
 
 // `versionDep` is the framework npm package whose installed version labels the
-// row (e.g. "Astro 7.0.2"); `appDir` locates its install.
+// row (e.g. "Astro 7.0.2"); `appDir` locates its install. `based` names the
+// underlying runtime/UI tech. `diffKey` matches the VARIANTS key used in
+// origin-diff/summary.md so the origin pixel-diff column can be joined in.
 const variants = [
-  { label: "Astro", pkg: "@otw/web", appDir: "apps/web", versionDep: "astro", outDir: path.join(repoRoot, "apps/web/dist"), kind: SSG_FOCUSED },
+  { label: "Astro", pkg: "@otw/web", appDir: "apps/web", versionDep: "astro", based: "Astro islands (vanilla)", diffKey: "astro", outDir: path.join(repoRoot, "apps/web/dist"), kind: SSG_FOCUSED },
   {
     label: "React Router",
     pkg: "@otw/web-react-router",
     appDir: "apps/react-router",
     versionDep: "react-router",
+    based: "React",
+    diffKey: "react-router",
     outDir: path.join(repoRoot, "apps/react-router/build/client"),
     kind: SSG_CAPABLE,
   },
   {
-    label: "TanStack",
+    label: "TanStack Start",
     pkg: "@otw/web-tanstack",
     appDir: "apps/tanstack-router",
     versionDep: "@tanstack/react-start",
+    based: "React",
+    diffKey: "tanstack",
+    diffLabel: "TanStack",
     outDir: path.join(repoRoot, "apps/tanstack-router/dist/client"),
     kind: SSG_CAPABLE,
   },
-  { label: "Kudzu", pkg: "@otw/web-kudzu", appDir: "apps/kudzu", versionDep: "@kudzujs/core", outDir: path.join(repoRoot, "apps/kudzu/dist"), kind: SSG_FOCUSED },
-  { label: "Hugo", pkg: "@otw/web-hugo", appDir: "apps/hugo", versionDep: "hugo-bin", outDir: path.join(repoRoot, "apps/hugo/public"), kind: SSG_FOCUSED },
+  { label: "Kudzu", pkg: "@otw/web-kudzu", appDir: "apps/kudzu", versionDep: "@kudzujs/core", based: "Kudzu (JSX, no vDOM)", diffKey: "kudzu", outDir: path.join(repoRoot, "apps/kudzu/dist"), kind: SSG_FOCUSED },
+  { label: "Hugo", pkg: "@otw/web-hugo", appDir: "apps/hugo", versionDep: "hugo-bin", based: "Go (templates)", diffKey: "hugo", outDir: path.join(repoRoot, "apps/hugo/public"), kind: SSG_FOCUSED },
   {
     label: "VitePress",
     pkg: "@otw/web-vitepress",
     appDir: "apps/vitepress",
     versionDep: "vitepress",
+    based: "Vue",
+    diffKey: "vitepress",
     outDir: path.join(repoRoot, "apps/vitepress/.vitepress/dist"),
     kind: SSG_FOCUSED,
   },
@@ -86,6 +94,8 @@ const variants = [
     pkg: "@otw/web-docusaurus",
     appDir: "apps/docusaurus",
     versionDep: "@docusaurus/core",
+    based: "React",
+    diffKey: "docusaurus",
     outDir: path.join(repoRoot, "apps/docusaurus/build"),
     kind: SSG_FOCUSED,
   },
@@ -94,6 +104,8 @@ const variants = [
     pkg: "@otw/web-eleventy",
     appDir: "apps/eleventy",
     versionDep: "@11ty/eleventy",
+    based: "Node (Nunjucks)",
+    diffKey: "eleventy",
     outDir: path.join(repoRoot, "apps/eleventy/_site"),
     kind: SSG_FOCUSED,
   },
@@ -102,6 +114,8 @@ const variants = [
     pkg: "@otw/web-next-app",
     appDir: "apps/next-app",
     versionDep: "next",
+    based: "React",
+    diffKey: "next-app",
     outDir: path.join(repoRoot, "apps/next-app/out"),
     kind: SSG_CAPABLE,
   },
@@ -110,6 +124,8 @@ const variants = [
     pkg: "@otw/web-next-pages",
     appDir: "apps/next-pages",
     versionDep: "next",
+    based: "React",
+    diffKey: "next-pages",
     outDir: path.join(repoRoot, "apps/next-pages/out"),
     kind: SSG_CAPABLE,
   },
@@ -158,6 +174,41 @@ function runBuild(pkg) {
   return result.status === 0;
 }
 
+/**
+ * Parse origin-diff/summary.md (written by `pnpm run origin:diff`) into a
+ * { <variant label>: "<ratio>" } map, using the HOME page section's "Diff
+ * 비율" column as the representative origin-vs-deployed pixel delta. Returns
+ * an empty map (→ "-" cells) when the report is absent, so build:stats never
+ * depends on having run origin:diff first.
+ */
+function loadOriginDiff() {
+  const summaryPath = path.join(repoRoot, "origin-diff", "summary.md");
+  if (!existsSync(summaryPath)) return {};
+  const md = readFileSync(summaryPath, "utf8");
+  // Only read rows under the first "## " page section (home): stop at the
+  // next page heading so archive rows don't overwrite home values.
+  const lines = md.split("\n");
+  const map = {};
+  let inFirstSection = false;
+  let sectionsSeen = 0;
+  for (const line of lines) {
+    if (line.startsWith("## ")) {
+      sectionsSeen += 1;
+      inFirstSection = sectionsSeen === 1 && !line.includes("각주");
+      continue;
+    }
+    if (!inFirstSection) continue;
+    // Data row: | 변형 | 크기 | Diff 픽셀 | Diff 비율 | 비고 |
+    const cells = line.split("|").map((c) => c.trim());
+    if (cells.length < 6) continue;
+    const label = cells[1];
+    const ratio = cells[4];
+    if (!label || label === "변형" || ratio === "Diff 비율") continue;
+    map[label] = ratio;
+  }
+  return map;
+}
+
 async function main() {
   let anyFailure = false;
   const rows = [];
@@ -194,41 +245,75 @@ async function main() {
     rows.push({ variant, ok: true, seconds, stats });
   }
 
-  const header =
-    "| 변형 (Variant) | 특징 (Type) | 빌드 시간(s) (Build) | 총 출력 크기 (Total) | JS 크기 (JS) | 파일 수 (Files) |";
-  const divider = "| --- | --- | --- | --- | --- | --- |";
-  const tableRows = rows.map(({ variant, ok, seconds, stats }) => {
-    const version = versionOf(variant.appDir, variant.versionDep);
-    const name = version ? `${variant.label} ${version}` : variant.label;
-    const kind = `${variant.kind.ko} / ${variant.kind.en}`;
-    const time = seconds === null ? "-" : seconds.toFixed(1);
-    if (!ok) {
-      return `| ${name} | ${kind} | ${time} | ❌ | ❌ | ❌ |`;
-    }
-    return `| ${name} | ${kind} | ${time} | ${formatBytes(stats.totalBytes)} | ${formatBytes(stats.jsBytes)} | ${stats.fileCount} |`;
+  const originDiff = loadOriginDiff();
+  // Sort by build time ascending (fastest first); un-measured (--skip-build,
+  // seconds=null) and failed builds sink to the bottom.
+  const sortedRows = [...rows].sort((a, b) => {
+    const sa = a.seconds == null || !a.ok ? Infinity : a.seconds;
+    const sb = b.seconds == null || !b.ok ? Infinity : b.seconds;
+    return sa - sb;
   });
 
   const measuredAt = new Date().toISOString();
-  const footnote = `_로컬에서 \`pnpm run build:stats\`로 측정(수동 갱신), 콘텐츠 양·머신에 따라 변동. (Measured locally via \`pnpm run build:stats\`; varies with content volume and machine.) 측정 시각(Measured at): ${measuredAt}_`;
 
-  const table = [header, divider, ...tableRows, "", footnote].join("\n");
+  // Build the localized table (header + divider + rows + footnote) for one
+  // language, then inject it between the markers in that language's README.
+  const L = {
+    ko: {
+      header: "| 변형 | 기반 | 특징 | 빌드 시간(s) | 총 출력 크기 | JS 크기 | 파일 수 | 원본 대비 diff |",
+      kind: (v) => v.kind.ko,
+      footnote: `_로컬에서 \`pnpm run build:stats\`로 측정(수동 갱신), 콘텐츠 양·머신에 따라 변동. 빌드 시간 오름차순 정렬. "원본 대비 diff"는 \`pnpm run origin:diff\`가 만든 홈 화면 픽셀 diff(라이브 원본 대비, 이미지·분석 스크립트 차단 상태)이며 없으면 \`-\`. 측정 시각: ${measuredAt}_`,
+    },
+    en: {
+      header: "| Variant | Based | Type | Build (s) | Total size | JS size | Files | Origin diff |",
+      kind: (v) => v.kind.en,
+      footnote: `_Measured locally via \`pnpm run build:stats\` (manual refresh); varies with content volume and machine. Sorted by build time asc. "Origin diff" is the home-page pixel delta vs the live origin from \`pnpm run origin:diff\` (images/analytics blocked), or \`-\` if not run. Measured at: ${measuredAt}_`,
+    },
+  };
+  const divider = "| --- | --- | --- | --- | --- | --- | --- | --- |";
 
-  const readme = await readFile(readmePath, "utf8");
-  const startIndex = readme.indexOf(startMarker);
-  const endIndex = readme.indexOf(endMarker);
-  if (startIndex === -1 || endIndex === -1) {
-    console.error(
-      `build-stats: could not find "${startMarker}" / "${endMarker}" markers in README.md. Add them before running this script.`,
-    );
-    process.exit(1);
+  function renderTable(lang) {
+    const t = L[lang];
+    const tableRows = sortedRows.map(({ variant, ok, seconds, stats }) => {
+      const version = versionOf(variant.appDir, variant.versionDep);
+      const name = version ? `${variant.label} ${version}` : variant.label;
+      const based = variant.based;
+      const kind = t.kind(variant);
+      const time = seconds === null ? "-" : seconds.toFixed(1);
+      const diff = originDiff[variant.diffLabel ?? variant.label] ?? "-";
+      if (!ok) {
+        return `| ${name} | ${based} | ${kind} | ${time} | ❌ | ❌ | ❌ | ${diff} |`;
+      }
+      return `| ${name} | ${based} | ${kind} | ${time} | ${formatBytes(stats.totalBytes)} | ${formatBytes(stats.jsBytes)} | ${stats.fileCount} | ${diff} |`;
+    });
+    return [t.header, divider, ...tableRows, "", t.footnote].join("\n");
   }
 
-  const before = readme.slice(0, startIndex + startMarker.length);
-  const after = readme.slice(endIndex);
-  const nextReadme = `${before}\n${table}\n${after}`;
-  await writeFile(readmePath, nextReadme);
+  // Inject the table between the markers in a README file; skips (with a
+  // warning) any target that is missing or lacks the markers, so a repo with
+  // only README.md still works.
+  async function injectInto(file, lang) {
+    const absPath = path.join(repoRoot, file);
+    if (!existsSync(absPath)) {
+      console.warn(`build-stats: ${file} not found, skipping`);
+      return;
+    }
+    const readme = await readFile(absPath, "utf8");
+    const startIndex = readme.indexOf(startMarker);
+    const endIndex = readme.indexOf(endMarker);
+    if (startIndex === -1 || endIndex === -1) {
+      console.warn(`build-stats: markers not found in ${file}, skipping`);
+      return;
+    }
+    const before = readme.slice(0, startIndex + startMarker.length);
+    const after = readme.slice(endIndex);
+    await writeFile(absPath, `${before}\n${renderTable(lang)}\n${after}`);
+    console.log(`build-stats: ${file} updated (${measuredAt})`);
+  }
 
-  console.log(`build-stats: README.md updated (${measuredAt})`);
+  await injectInto("README.md", "ko");
+  await injectInto("README.en.md", "en");
+
   if (anyFailure) {
     console.error("build-stats: one or more builds failed");
     process.exit(1);

@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { APIErrorCode, Client, isFullPage, isNotionClientError, iteratePaginatedAPI } from "@notionhq/client";
 import type { PageObjectResponse } from "@notionhq/client";
 import { collectBlocks } from "./blocks.js";
-import { richTextToPlainText } from "./format.js";
+import { fileToUrl, richTextToPlainText } from "./format.js";
 import { createProcessor } from "./processor.js";
 import type { NewsEntry } from "./types.js";
 
@@ -130,13 +130,7 @@ async function renderPage(client: Client, page: PageObjectResponse): Promise<New
   const title = titleProperty?.type === "title" && titleProperty.title ? richTextToPlainText(titleProperty.title) : "";
   const dateProperty = page.properties.날짜 as { type?: string; date?: { start: string } | null } | undefined;
   const date = dateProperty?.type === "date" ? (dateProperty.date?.start ?? null) : null;
-  // Cover images are intentionally dropped: Notion `type:"file"` covers are
-  // short-lived signed S3 URLs (~1h) that break after deploy, and these
-  // variants (unlike the origin site's CDN) can't proxy them — so every
-  // consumer renders a placeholder instead of a remote <img>, keeping the
-  // static output free of expiring external image fetches. See blocks.ts
-  // for the matching body-image removal.
-  const coverUrl = null;
+  const coverUrl = page.cover ? (fileToUrl(page.cover) ?? null) : null;
 
   try {
     const blocks = await collectBlocks(client, page.id);
