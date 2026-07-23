@@ -129,7 +129,7 @@ async function main() {
   });
 
   const measuredAt = new Date().toISOString();
-  const footnote = `_GitHub Actions ubuntu-latest에서 측정, 콘텐츠 양에 따라 변동. 측정 시각: ${measuredAt}_`;
+  const footnote = `_로컬에서 \`pnpm run build:stats\`로 측정(수동 갱신), 콘텐츠 양·머신에 따라 변동. 측정 시각: ${measuredAt}_`;
 
   const table = [header, divider, ...tableRows, "", footnote].join("\n");
 
