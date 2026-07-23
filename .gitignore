@@ -8,6 +8,9 @@ apps/tanstack-router/.tanstack/
 apps/kudzu/dist/
 apps/kudzu/.kudzu/
 packages/notion-content/dist/
+# local artifacts of scripts/build-stats.mjs and scripts/visual-diff.mjs
+site/
+visual-diff/
 # generated types
 apps/web/.astro/
 apps/react-router/.react-router/

@@ -10,12 +10,17 @@
     "build": "pnpm --filter @otw/web build",
     "build:content": "pnpm --filter @otw/notion-content build",
     "build:variants": "pnpm run build:content && pnpm --filter @otw/web-react-router build && pnpm --filter @otw/web-tanstack build && pnpm --filter @otw/web-kudzu build",
-    "build:all": "pnpm run build && pnpm run build:variants"
+    "build:all": "pnpm run build && pnpm run build:variants",
+    "build:stats": "node ./scripts/build-stats.mjs",
+    "visual:diff": "node ./scripts/visual-diff.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.13.2",
     "eslint": "^10.5.0",
+    "pixelmatch": "^7.1.1",
+    "playwright": "^1.61.1",
+    "pngjs": "^7.0.0",
     "prettier": "^3.8.4",
     "rimraf": "^6.1.3"
   },

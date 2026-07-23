@@ -18,6 +18,21 @@
 - `packages/notion-loader` — Notion을 Astro Content Layer로 불러오는 재사용 가능한 로더 패키지(`@otw/notion-loader`).
 - `packages/notion-content` — 프레임워크 중립 Notion 콘텐츠 페처(`@otw/notion-content`). react-router/tanstack/kudzu 앱이 빌드 타임에 사용합니다.
 
+## 빌드 통계
+
+CI에서 자동 갱신됨(scripts/build-stats.mjs).
+
+<!-- build-stats:start -->
+| 변형 | 빌드 시간(s) | 총 출력 크기 | JS 크기 | 파일 수 |
+| --- | --- | --- | --- | --- |
+| Astro | - | 769.7 KB | 99.9 KB | 24 |
+| React Router | - | 597.1 KB | 324.3 KB | 17 |
+| TanStack | - | 598.9 KB | 332.3 KB | 14 |
+| Kudzu | - | 283.4 KB | 15.9 KB | 13 |
+
+_GitHub Actions ubuntu-latest에서 측정, 콘텐츠 양에 따라 변동. 측정 시각: 2026-07-23T07:06:46.530Z_
+<!-- build-stats:end -->
+
 ## 개발
 
 Node.js(fnm 권장, `.nvmrc` 참고)가 설치되어야 합니다.
