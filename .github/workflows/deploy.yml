@@ -11,8 +11,26 @@ concurrency:
   group: pages
   cancel-in-progress: true
 jobs:
+  # Each variant builds in its own runner so total wall time is
+  # install + slowest single build instead of the sum of all four.
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: astro
+            filter: '@otw/web'
+            out: apps/web/dist
+          - app: react-router
+            filter: '@otw/web-react-router'
+            out: apps/react-router/build/client
+          - app: tanstack
+            filter: '@otw/web-tanstack'
+            out: apps/tanstack-router/dist/client
+          - app: kudzu
+            filter: '@otw/web-kudzu'
+            out: apps/kudzu/dist
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -23,31 +41,52 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --no-frozen-lockfile
-      - name: Build all apps
-        run: pnpm run build:all
+      # Shared prerequisite: react-router/tanstack/kudzu import the compiled
+      # dist of @otw/notion-content at build time. Cheap (a tsc run), so each
+      # runner just builds it locally instead of passing an artifact around.
+      - run: pnpm --filter @otw/notion-content build
+      - name: Build ${{ matrix.app }}
+        run: pnpm --filter ${{ matrix.filter }} build
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.app }}
+          path: ${{ matrix.out }}
+          retention-days: 1
+          # Keep parity with the previous single-job cp: astro ships a hidden
+          # .assetsignore and react-router a .vite/ manifest dir.
+          include-hidden-files: true
+  assemble:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          path: dist
       - name: Assemble Pages artifact
         run: |
           mkdir -p site
           # Root: static landing hub linking to the four framework variants.
           cp -R landing/. site/
           mkdir -p site/astro site/react-router site/tanstack site/kudzu
-          cp -R apps/web/dist/. site/astro/
+          cp -R dist/dist-astro/. site/astro/
           # react-router emits HTML under its basename inside build/client;
           # merge assets (root) + pages (base-prefixed dir) into site/react-router.
-          cp -R apps/react-router/build/client/. site/react-router/
-          cp -R apps/react-router/build/client/ones-to-watch-refactor-test/react-router/. site/react-router/
+          cp -R dist/dist-react-router/. site/react-router/
+          cp -R dist/dist-react-router/ones-to-watch-refactor-test/react-router/. site/react-router/
           rm -rf site/react-router/ones-to-watch-refactor-test
-          cp -R apps/tanstack-router/dist/client/. site/tanstack/
-          cp -R apps/kudzu/dist/. site/kudzu/
+          cp -R dist/dist-tanstack/. site/tanstack/
+          cp -R dist/dist-kudzu/. site/kudzu/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
   deploy:
-    needs: build
+    needs: assemble
     runs-on: ubuntu-latest
     environment:
       name: github-pages
