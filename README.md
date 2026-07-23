@@ -25,12 +25,12 @@ CI에서 자동 갱신됨(scripts/build-stats.mjs).
 <!-- build-stats:start -->
 | 변형 | 빌드 시간(s) | 총 출력 크기 | JS 크기 | 파일 수 |
 | --- | --- | --- | --- | --- |
-| Astro | - | 769.7 KB | 99.9 KB | 24 |
-| React Router | - | 597.1 KB | 324.3 KB | 17 |
-| TanStack | - | 598.9 KB | 332.3 KB | 14 |
-| Kudzu | - | 283.4 KB | 15.9 KB | 13 |
+| Astro | 6.6 | 5.0 MB | 99.9 KB | 157 |
+| React Router | 312.8 | 6.8 MB | 325.4 KB | 284 |
+| TanStack | 162.2 | 6.4 MB | 332.3 KB | 147 |
+| Kudzu | 441.3 | 2.4 MB | 15.9 KB | 142 |
 
-_GitHub Actions ubuntu-latest에서 측정, 콘텐츠 양에 따라 변동. 측정 시각: 2026-07-23T07:06:46.530Z_
+_GitHub Actions ubuntu-latest에서 측정, 콘텐츠 양에 따라 변동. 측정 시각: 2026-07-23T08:51:38.752Z_
 <!-- build-stats:end -->
 
 ## 개발
