@@ -9,7 +9,8 @@
 
 ## 구조
 
-- `apps/web` — 정적(Static) Astro 사이트. GitHub Pages(`https://simyunsup.github.io/ones-to-watch-refactor-test/`)에 배포됩니다.
+- `landing/` — 사이트 루트(`https://simyunsup.github.io/ones-to-watch-refactor-test/`)에 배포되는 변형 선택 랜딩 페이지.
+- `apps/web` — 정적(Static) Astro 사이트. `/astro/` 경로에 배포됩니다.
 - `apps/react-router` — 같은 사이트의 React Router v7(framework mode, prerender) 리팩토링. `/react-router/` 경로에 배포됩니다.
 - `apps/tanstack-router` — TanStack Start(정적 prerender) 리팩토링. `/tanstack/` 경로에 배포됩니다.
 - `apps/kudzu` — [kudzu](https://github.com/kudzujs/kudzu) 리팩토링. `/kudzu/` 경로에 배포됩니다.

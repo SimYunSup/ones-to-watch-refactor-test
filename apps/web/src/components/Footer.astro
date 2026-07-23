@@ -1,8 +1,30 @@
 ---
 const today = new Date();
+
+// Every static variant links to the other three so readers can hop between
+// framework implementations of the same content (same list as the variants'
+// footers in apps/react-router, apps/tanstack-router, and apps/kudzu).
+const variants = [
+  { key: "astro", href: "https://simyunsup.github.io/ones-to-watch-refactor-test/astro/" },
+  { key: "react-router", href: "https://simyunsup.github.io/ones-to-watch-refactor-test/react-router/" },
+  { key: "tanstack", href: "https://simyunsup.github.io/ones-to-watch-refactor-test/tanstack/" },
+  { key: "kudzu", href: "https://simyunsup.github.io/ones-to-watch-refactor-test/kudzu/" },
+];
+const current = "astro";
 ---
 
 <footer>
+  <nav class="variant-switch" aria-label="프레임워크 변형 전환">
+    {variants.map((variant) => (
+      <a
+        href={variant.href}
+        class:list={["variant-link", { "is-active": variant.key === current }]}
+        aria-current={variant.key === current ? "page" : undefined}
+      >
+        {variant.key}
+      </a>
+    ))}
+  </nav>
   &copy; {today.getFullYear()} OTW for FE All rights reserved.
 </footer>
 <style>
@@ -13,5 +35,29 @@ const today = new Date();
     color: var(--muted-color);
     text-align: center;
     font-size: 0.875rem;
+  }
+  .variant-switch {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-family: var(--font-mono, ui-monospace, monospace);
+  }
+  .variant-link {
+    color: var(--muted-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 4px 10px;
+    text-decoration: none;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .variant-link:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+  .variant-link.is-active {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    font-weight: 600;
   }
 </style>

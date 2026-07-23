@@ -4,7 +4,7 @@ const VARIANTS = [
   {
     key: "astro",
     label: "astro",
-    href: "https://simyunsup.github.io/ones-to-watch-refactor-test/",
+    href: "https://simyunsup.github.io/ones-to-watch-refactor-test/astro/",
   },
   {
     key: "react-router",

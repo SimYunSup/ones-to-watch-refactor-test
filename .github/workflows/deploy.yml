@@ -31,8 +31,10 @@ jobs:
       - name: Assemble Pages artifact
         run: |
           mkdir -p site
-          cp -R apps/web/dist/. site/
-          mkdir -p site/react-router site/tanstack site/kudzu
+          # Root: static landing hub linking to the four framework variants.
+          cp -R landing/. site/
+          mkdir -p site/astro site/react-router site/tanstack site/kudzu
+          cp -R apps/web/dist/. site/astro/
           # react-router emits HTML under its basename inside build/client;
           # merge assets (root) + pages (base-prefixed dir) into site/react-router.
           cp -R apps/react-router/build/client/. site/react-router/

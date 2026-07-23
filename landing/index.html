@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ones To Watch for FrontEnd — Framework Variants</title>
+  <meta name="description" content="같은 뉴스레터 사이트를 네 가지 프레임워크로 각각 빌드한 리팩토링 실험장입니다." />
+  <link rel="icon" href="/ones-to-watch-refactor-test/astro/favicon.svg" type="image/svg+xml" />
+  <style>
+    /* Same editorial token system as the variant apps (apps/web global.css). */
+    :root {
+      --font-sans: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      --bg: #ffffff;
+      --surface: #f8fafc;
+      --line: #e2e8f0;
+      --ink: #0f172a;
+      --muted: #475569;
+      --accent: #4f46e5;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --surface: #1e293b;
+        --line: #334155;
+        --ink: #f8fafc;
+        --muted: #94a3b8;
+        --accent: #818cf8;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--ink);
+    }
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 96px 32px;
+    }
+    .mono-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      margin: 0 0 20px;
+    }
+    h1 {
+      font-size: 44px;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin: 0 0 16px;
+      text-wrap: pretty;
+    }
+    .sub {
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--muted);
+      margin: 0 0 48px;
+      word-break: keep-all;
+    }
+    .variants {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .variant {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      padding: 20px 24px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+    .variant:hover {
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+    .variant .name {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--accent);
+      min-width: 130px;
+    }
+    .variant .desc {
+      font-size: 14.5px;
+      color: var(--muted);
+      word-break: keep-all;
+    }
+    footer {
+      margin-top: 64px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: var(--accent); }
+    @media (max-width: 640px) {
+      main { padding: 64px 24px; }
+      h1 { font-size: 32px; }
+      .variant { flex-direction: column; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="mono-eyebrow">// one newsletter, four frameworks</p>
+    <h1>Ones To Watch<br />for FrontEnd</h1>
+    <p class="sub">
+      같은 Notion 기반 뉴스레터 사이트를 네 가지 프레임워크로 각각 정적 빌드한
+      리팩토링 실험장입니다. 아래에서 변형을 골라 들어가세요.
+    </p>
+    <ul class="variants">
+      <li>
+        <a class="variant" href="/ones-to-watch-refactor-test/astro/">
+          <span class="name">astro</span>
+          <span class="desc">원본 구현 — Content Layer + 정적 빌드, RSS·사이트맵·검색 포함</span>
+        </a>
+      </li>
+      <li>
+        <a class="variant" href="/ones-to-watch-refactor-test/react-router/">
+          <span class="name">react-router</span>
+          <span class="desc">React Router v7 framework mode, ssr:false + prerender</span>
+        </a>
+      </li>
+      <li>
+        <a class="variant" href="/ones-to-watch-refactor-test/tanstack/">
+          <span class="name">tanstack</span>
+          <span class="desc">TanStack Start, 정적 prerender + static server functions</span>
+        </a>
+      </li>
+      <li>
+        <a class="variant" href="/ones-to-watch-refactor-test/kudzu/">
+          <span class="name">kudzu</span>
+          <span class="desc">HTML-first TSX 실험 프레임워크, getStaticPaths 정적 출력</span>
+        </a>
+      </li>
+    </ul>
+    <footer>
+      <a href="https://github.com/SimYunSup/ones-to-watch-refactor-test">GitHub 저장소</a>
+      · 원본: <a href="https://ones-to-watch.ethansup.net">ones-to-watch.ethansup.net</a>
+    </footer>
+  </main>
+</body>
+</html>
