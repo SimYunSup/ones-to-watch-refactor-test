@@ -1,0 +1,17 @@
+{
+  "name": "@otw/web-kudzu",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "kudzu dev",
+    "build": "kudzu build"
+  },
+  "dependencies": {
+    "@kudzujs/core": "^0.5.2",
+    "@otw/notion-content": "workspace:*",
+    "@pickhealer/munja": "^0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0"
+  }
+}

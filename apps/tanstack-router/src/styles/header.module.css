@@ -1,0 +1,54 @@
+/* Simplified header: site name link + Archive link (no search/theme toggle —
+   scoped out of the framework-variant parity requirements). */
+.header {
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background-color: var(--bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 50;
+  transition: background-color 0.3s ease;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  height: 4rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.logoSub {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.link {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--muted);
+  transition: color 0.15s ease;
+}
+.link:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1.25rem;
+  }
+}

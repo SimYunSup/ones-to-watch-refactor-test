@@ -1,0 +1,196 @@
+/* Post detail — markdown body styling. Ported from
+   apps/web/src/styles/content.css, trimmed of the TOC sidebar and reading
+   progress bar (neither is implemented in this variant). */
+@import url("https://tetunori.github.io/fluent-emoji-webfont/dist/FluentEmojiFlat.css");
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-top: 1.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+
+  @media (min-width: 769px) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.title {
+  margin: 1rem 0;
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+.description {
+  margin-bottom: 1rem;
+  padding: 0 0 8px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.image-container {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+
+  @media (min-width: 769px) {
+    & {
+      width: 70%;
+    }
+  }
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+}
+
+.markdown-body {
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 760px;
+  padding: 0 .5rem;
+  font-family: var(--font-sans), "Fluent Emoji Flat";
+
+  @media (min-width: 769px) {
+    padding: 0 1rem;
+  }
+
+  & code {
+    margin: 0;
+    font-size: 85%;
+    white-space: break-spaces;
+    background-color: #818b981f;
+    border-radius: 6px;
+    padding: 0 .2em;
+    font-size: inherit;
+  }
+
+  & pre {
+    position: relative;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 0.5rem;
+    overflow-x: auto;
+  }
+
+  & pre code {
+    background: transparent;
+    padding: 0;
+  }
+
+  & h1 {
+    position: relative;
+    margin: 1rem 0 0;
+    font-size: 1.7rem;
+    line-height: 2.5rem;
+  }
+
+  & h2 {
+    position: relative;
+    margin: 0.5rem 0 0;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    transition: color 0.2s ease;
+    scroll-margin-top: 100px;
+
+    &:hover {
+      color: var(--primary-color);
+    }
+
+    &:hover::after {
+      content: "🔗";
+      position: relative;
+      float: left;
+      font-size: 1rem;
+      line-height: 1.75rem;
+      animation: fadeIn 0.2s ease-in;
+
+      @media (min-width: 769px) {
+        left: -1.5rem;
+        top: 0;
+        font-size: 1rem;
+        position: absolute;
+      }
+    }
+  }
+
+  & p {
+    margin: .5rem 0 0;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    line-height: 1.45;
+
+    &+h2 {
+      margin: 1.5rem 0 0;
+    }
+  }
+
+  & a {
+    text-decoration: none;
+    border-radius: .375rem;
+    padding: .125rem .375rem;
+    font-size: 1rem;
+    color: var(--primary-color);
+    background: var(--hover-bg);
+    transition: all .2s ease-in-out;
+    border: 1px solid transparent;
+
+    &:hover {
+      background: var(--card-bg);
+      border-color: var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+
+  &>.bookmark-link {
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    font-family: inherit;
+    margin: 1rem 0 0;
+    padding: 1rem;
+    text-decoration: none;
+    border-radius: .5rem;
+    font-size: 1rem;
+    color: var(--foreground);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    transition: all .2s ease-in-out;
+    box-shadow: var(--shadow-sm);
+
+    &:has(+ &) {
+      margin-top: 1.25rem;
+    }
+
+    &+p {
+      margin-top: 1rem;
+    }
+
+    &:hover {
+      background: var(--hover-bg);
+      border-color: var(--primary-color);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+  }
+}
+
+/* @keyframes must live at the top level — nesting it inside a rule breaks
+   most CSS minifiers. */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

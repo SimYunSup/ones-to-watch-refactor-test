@@ -9,9 +9,14 @@
 
 ## 구조
 
-- `apps/web` — 정적(Static) Astro 사이트. GitHub Pages(`https://simyunsup.github.io/ones-to-watch-refactor-test/`)에 배포됩니다.
+- `landing/` — 사이트 루트(`https://simyunsup.github.io/ones-to-watch-refactor-test/`)에 배포되는 변형 선택 랜딩 페이지.
+- `apps/web` — 정적(Static) Astro 사이트. `/astro/` 경로에 배포됩니다.
+- `apps/react-router` — 같은 사이트의 React Router v7(framework mode, prerender) 리팩토링. `/react-router/` 경로에 배포됩니다.
+- `apps/tanstack-router` — TanStack Start(정적 prerender) 리팩토링. `/tanstack/` 경로에 배포됩니다.
+- `apps/kudzu` — [kudzu](https://github.com/kudzujs/kudzu) 리팩토링. `/kudzu/` 경로에 배포됩니다.
 - `apps/crawler` — 뉴스레터 썸네일/북마크 크롤링을 담당하는 Cloudflare Queue 워커.
 - `packages/notion-loader` — Notion을 Astro Content Layer로 불러오는 재사용 가능한 로더 패키지(`@otw/notion-loader`).
+- `packages/notion-content` — 프레임워크 중립 Notion 콘텐츠 페처(`@otw/notion-content`). react-router/tanstack/kudzu 앱이 빌드 타임에 사용합니다.
 
 ## 개발
 
@@ -26,11 +31,13 @@ pnpm dev
 ```
 
 `pnpm build`는 `apps/web`을 정적 사이트로 빌드합니다(`apps/web/dist`).
+`pnpm build:variants`는 `@otw/notion-content`를 컴파일한 뒤 react-router/tanstack/kudzu 변형을,
+`pnpm build:all`은 네 앱을 전부 빌드합니다. 배포 워크플로는 네 결과물을 하나의 Pages 아티팩트로 합칩니다.
 
 ## 컨텐츠
 
 콘텐츠 로딩에는 `NOTION_TOKEN`, `NOTION_DATABASE_ID` 환경 변수(로컬 `.env`) 또는 GitHub Actions secrets가 필요합니다.
-값이 없으면 `@otw/notion-loader`가 빈 컬렉션으로 정상적으로 빌드되므로, 시크릿이 없어도 사이트 자체는 빌드에 실패하지 않습니다.
+값이 없으면 `@otw/notion-loader`/`@otw/notion-content`가 빈 컬렉션으로 정상적으로 빌드되므로, 시크릿이 없어도 사이트 자체는 빌드에 실패하지 않습니다.
 
 직접적인 컨텐츠 기여는 [심윤섭](https://github.com/SimYunSup)이나 이슈를 통해 제안주시면 감사하겠습니다!
 
