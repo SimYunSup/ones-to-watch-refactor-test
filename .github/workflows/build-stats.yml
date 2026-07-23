@@ -25,9 +25,22 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --no-frozen-lockfile
+      # Prefetch Notion content once into a cache file. Two reasons:
+      # (1) RR v8's preview-server prerender enforces a hard 10s per-request
+      #     timeout (not configurable via react-router.config.ts) and the
+      #     preview server is a separate process, so a live fetch of the full
+      #     database inside a prerendered loader blows past it and fails the
+      #     build. Reading the cache file is instant.
+      # (2) The table then measures build time, not Notion fetch time.
+      # astro still fetches live via notion-loader (its own pipeline).
+      - run: pnpm run prefetch:content
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
       - name: Measure build times and sizes (updates README)
         run: pnpm run build:stats
         env:
+          NOTION_CONTENT_CACHE: ${{ github.workspace }}/notion-cache/news-entries.json
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
       - name: Install Playwright Chromium
