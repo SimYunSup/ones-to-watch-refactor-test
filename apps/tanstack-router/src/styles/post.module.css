@@ -1,0 +1,83 @@
+/* Editorial list row: thumbnail + title + mono date, divided by hairlines.
+   Ported from apps/react-router/app/styles/post.module.css. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 8px;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+}
+.row:hover {
+  background: var(--surface);
+}
+
+.thumb {
+  flex-shrink: 0;
+  width: 160px;
+  height: 100px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--thumb-a),
+    var(--thumb-a) 6px,
+    var(--thumb-b) 6px,
+    var(--thumb-b) 12px
+  );
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  font-size: 16.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--ink);
+  text-wrap: pretty;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.date {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .row {
+    gap: 14px;
+  }
+  .thumb {
+    width: 96px;
+    height: 64px;
+  }
+  .title {
+    font-size: 15px;
+  }
+  .date {
+    display: none;
+  }
+}

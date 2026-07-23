@@ -23,15 +23,27 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --no-frozen-lockfile
-      - name: Build
-        run: pnpm --filter @otw/web build
+      - name: Build all apps
+        run: pnpm run build:all
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      - name: Assemble Pages artifact
+        run: |
+          mkdir -p site
+          cp -R apps/web/dist/. site/
+          mkdir -p site/react-router site/tanstack site/kudzu
+          # react-router emits HTML under its basename inside build/client;
+          # merge assets (root) + pages (base-prefixed dir) into site/react-router.
+          cp -R apps/react-router/build/client/. site/react-router/
+          cp -R apps/react-router/build/client/ones-to-watch-refactor-test/react-router/. site/react-router/
+          rm -rf site/react-router/ones-to-watch-refactor-test
+          cp -R apps/tanstack-router/dist/client/. site/tanstack/
+          cp -R apps/kudzu/dist/. site/kudzu/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: apps/web/dist
+          path: site
   deploy:
     needs: build
     runs-on: ubuntu-latest

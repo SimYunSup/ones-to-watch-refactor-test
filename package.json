@@ -7,7 +7,10 @@
   },
   "scripts": {
     "dev": "pnpm --filter @otw/web dev",
-    "build": "pnpm --filter @otw/web build"
+    "build": "pnpm --filter @otw/web build",
+    "build:content": "pnpm --filter @otw/notion-content build",
+    "build:variants": "pnpm run build:content && pnpm --filter @otw/web-react-router build && pnpm --filter @otw/web-tanstack build && pnpm --filter @otw/web-kudzu build",
+    "build:all": "pnpm run build && pnpm run build:variants"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

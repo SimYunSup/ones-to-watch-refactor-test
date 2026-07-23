@@ -1,0 +1,73 @@
+/* News archive — mono eyebrow, title, editorial post list, pager.
+   Ported from apps/react-router/app/styles/list-page.css. */
+.archive {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 72px 32px 96px;
+}
+.archive-title {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 14px 0 32px;
+  color: var(--ink);
+}
+
+.post-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.archive-empty {
+  padding: 32px 8px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
+/* Pager */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 48px;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+}
+.pager-current {
+  min-width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+.pager-btn {
+  height: 38px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.pager-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  .archive {
+    padding: 48px 24px 72px;
+  }
+  .archive-title {
+    font-size: 28px;
+  }
+}
