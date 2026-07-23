@@ -9,6 +9,7 @@
     "dev": "pnpm --filter @otw/web dev",
     "build": "pnpm --filter @otw/web build",
     "build:content": "pnpm --filter @otw/notion-content build",
+    "prefetch:content": "pnpm run build:content && node packages/notion-content/scripts/prefetch.mjs",
     "build:variants": "pnpm run build:content && pnpm --filter @otw/web-react-router build && pnpm --filter @otw/web-tanstack build && pnpm --filter @otw/web-kudzu build",
     "build:all": "pnpm run build && pnpm run build:variants",
     "build:stats": "node ./scripts/build-stats.mjs",
