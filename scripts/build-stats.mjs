@@ -13,7 +13,6 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
-const readmePath = path.join(repoRoot, "README.md");
 const startMarker = "<!-- build-stats:start -->";
 const endMarker = "<!-- build-stats:end -->";
 
@@ -255,43 +254,66 @@ async function main() {
     return sa - sb;
   });
 
-  const header =
-    "| 변형 (Variant) | 기반 (Based) | 특징 (Type) | 빌드 시간(s) (Build) | 총 출력 크기 (Total) | JS 크기 (JS) | 파일 수 (Files) | 원본 대비 diff (Origin diff) |";
-  const divider = "| --- | --- | --- | --- | --- | --- | --- | --- |";
-  const tableRows = sortedRows.map(({ variant, ok, seconds, stats }) => {
-    const version = versionOf(variant.appDir, variant.versionDep);
-    const name = version ? `${variant.label} ${version}` : variant.label;
-    const based = variant.based;
-    const kind = `${variant.kind.ko} / ${variant.kind.en}`;
-    const time = seconds === null ? "-" : seconds.toFixed(1);
-    const diff = originDiff[variant.diffLabel ?? variant.label] ?? "-";
-    if (!ok) {
-      return `| ${name} | ${based} | ${kind} | ${time} | ❌ | ❌ | ❌ | ${diff} |`;
-    }
-    return `| ${name} | ${based} | ${kind} | ${time} | ${formatBytes(stats.totalBytes)} | ${formatBytes(stats.jsBytes)} | ${stats.fileCount} | ${diff} |`;
-  });
-
   const measuredAt = new Date().toISOString();
-  const footnote = `_로컬에서 \`pnpm run build:stats\`로 측정(수동 갱신), 콘텐츠 양·머신에 따라 변동. 빌드 시간 오름차순 정렬. "원본 대비 diff"는 \`pnpm run origin:diff\`가 만든 홈 화면 픽셀 diff(라이브 원본 대비, 이미지·분석 스크립트 차단 상태)이며 없으면 \`-\`. (Sorted by build time asc; origin diff = home-page pixel delta vs the live origin from \`pnpm run origin:diff\`, or \`-\` if not run.) 측정 시각(Measured at): ${measuredAt}_`;
 
-  const table = [header, divider, ...tableRows, "", footnote].join("\n");
+  // Build the localized table (header + divider + rows + footnote) for one
+  // language, then inject it between the markers in that language's README.
+  const L = {
+    ko: {
+      header: "| 변형 | 기반 | 특징 | 빌드 시간(s) | 총 출력 크기 | JS 크기 | 파일 수 | 원본 대비 diff |",
+      kind: (v) => v.kind.ko,
+      footnote: `_로컬에서 \`pnpm run build:stats\`로 측정(수동 갱신), 콘텐츠 양·머신에 따라 변동. 빌드 시간 오름차순 정렬. "원본 대비 diff"는 \`pnpm run origin:diff\`가 만든 홈 화면 픽셀 diff(라이브 원본 대비, 이미지·분석 스크립트 차단 상태)이며 없으면 \`-\`. 측정 시각: ${measuredAt}_`,
+    },
+    en: {
+      header: "| Variant | Based | Type | Build (s) | Total size | JS size | Files | Origin diff |",
+      kind: (v) => v.kind.en,
+      footnote: `_Measured locally via \`pnpm run build:stats\` (manual refresh); varies with content volume and machine. Sorted by build time asc. "Origin diff" is the home-page pixel delta vs the live origin from \`pnpm run origin:diff\` (images/analytics blocked), or \`-\` if not run. Measured at: ${measuredAt}_`,
+    },
+  };
+  const divider = "| --- | --- | --- | --- | --- | --- | --- | --- |";
 
-  const readme = await readFile(readmePath, "utf8");
-  const startIndex = readme.indexOf(startMarker);
-  const endIndex = readme.indexOf(endMarker);
-  if (startIndex === -1 || endIndex === -1) {
-    console.error(
-      `build-stats: could not find "${startMarker}" / "${endMarker}" markers in README.md. Add them before running this script.`,
-    );
-    process.exit(1);
+  function renderTable(lang) {
+    const t = L[lang];
+    const tableRows = sortedRows.map(({ variant, ok, seconds, stats }) => {
+      const version = versionOf(variant.appDir, variant.versionDep);
+      const name = version ? `${variant.label} ${version}` : variant.label;
+      const based = variant.based;
+      const kind = t.kind(variant);
+      const time = seconds === null ? "-" : seconds.toFixed(1);
+      const diff = originDiff[variant.diffLabel ?? variant.label] ?? "-";
+      if (!ok) {
+        return `| ${name} | ${based} | ${kind} | ${time} | ❌ | ❌ | ❌ | ${diff} |`;
+      }
+      return `| ${name} | ${based} | ${kind} | ${time} | ${formatBytes(stats.totalBytes)} | ${formatBytes(stats.jsBytes)} | ${stats.fileCount} | ${diff} |`;
+    });
+    return [t.header, divider, ...tableRows, "", t.footnote].join("\n");
   }
 
-  const before = readme.slice(0, startIndex + startMarker.length);
-  const after = readme.slice(endIndex);
-  const nextReadme = `${before}\n${table}\n${after}`;
-  await writeFile(readmePath, nextReadme);
+  // Inject the table between the markers in a README file; skips (with a
+  // warning) any target that is missing or lacks the markers, so a repo with
+  // only README.md still works.
+  async function injectInto(file, lang) {
+    const absPath = path.join(repoRoot, file);
+    if (!existsSync(absPath)) {
+      console.warn(`build-stats: ${file} not found, skipping`);
+      return;
+    }
+    const readme = await readFile(absPath, "utf8");
+    const startIndex = readme.indexOf(startMarker);
+    const endIndex = readme.indexOf(endMarker);
+    if (startIndex === -1 || endIndex === -1) {
+      console.warn(`build-stats: markers not found in ${file}, skipping`);
+      return;
+    }
+    const before = readme.slice(0, startIndex + startMarker.length);
+    const after = readme.slice(endIndex);
+    await writeFile(absPath, `${before}\n${renderTable(lang)}\n${after}`);
+    console.log(`build-stats: ${file} updated (${measuredAt})`);
+  }
 
-  console.log(`build-stats: README.md updated (${measuredAt})`);
+  await injectInto("README.md", "ko");
+  await injectInto("README.en.md", "en");
+
   if (anyFailure) {
     console.error("build-stats: one or more builds failed");
     process.exit(1);
