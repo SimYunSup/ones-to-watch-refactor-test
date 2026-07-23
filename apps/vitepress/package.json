@@ -1,0 +1,18 @@
+{
+  "name": "@otw/web-vitepress",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build"
+  },
+  "dependencies": {
+    "@otw/notion-content": "workspace:*",
+    "@pickhealer/munja": "^0.1.0",
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.40"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0"
+  }
+}

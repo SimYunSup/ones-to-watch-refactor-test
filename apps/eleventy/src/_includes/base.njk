@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title }}</title>
+    {%- if description %}
+    <meta name="description" content="{{ description }}" />
+    {%- endif %}
+    <link rel="icon" href="{{ site.base }}/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="{{ site.base }}/style.css" />
+    <link rel="stylesheet" href="{{ site.base }}/content.css" />
+  </head>
+  <body>
+    {%- include "header.njk" %}
+    {{ content | safe }}
+    {%- include "footer.njk" %}
+  </body>
+</html>

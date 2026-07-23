@@ -6,7 +6,8 @@
 import { createRequire } from "node:module";
 import { copyFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { fetchNewsEntries, entriesToSearchDocs, writeSearchIndexFile } from "@otw/notion-content";
+import { fetchNewsEntries } from "@otw/notion-content";
+import { entriesToSearchDocs, writeSearchIndexFile } from "@otw/notion-content/search";
 
 const require = createRequire(import.meta.url);
 

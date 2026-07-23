@@ -1,0 +1,29 @@
+{{/*
+  Ported from apps/kudzu/src/components/Footer.tsx, extended to all ten
+  variants per the shared cross-variant footer contract.
+*/}}
+{{ $variants := slice
+  (dict "key" "astro" "label" "astro" "href" "https://simyunsup.github.io/ones-to-watch-refactor-test/astro/")
+  (dict "key" "react-router" "label" "react-router" "href" "https://simyunsup.github.io/ones-to-watch-refactor-test/react-router/")
+  (dict "key" "tanstack" "label" "tanstack" "href" "https://simyunsup.github.io/ones-to-watch-refactor-test/tanstack/")
+  (dict "key" "kudzu" "label" "kudzu" "href" "https://simyunsup.github.io/ones-to-watch-refactor-test/kudzu/")
+  (dict "key" "hugo" "label" "hugo" "href" "https://simyunsup.github.io/ones-to-watch-refactor-test/hugo/")
+  (dict "key" "vitepress" "label" "vitepress" "href" "https://simyunsup.github.io/ones-to-watch-refactor-test/vitepress/")
+  (dict "key" "docusaurus" "label" "docusaurus" "href" "https://simyunsup.github.io/ones-to-watch-refactor-test/docusaurus/")
+  (dict "key" "eleventy" "label" "eleventy" "href" "https://simyunsup.github.io/ones-to-watch-refactor-test/eleventy/")
+  (dict "key" "next-app" "label" "next-app" "href" "https://simyunsup.github.io/ones-to-watch-refactor-test/next-app/")
+  (dict "key" "next-pages" "label" "next-pages" "href" "https://simyunsup.github.io/ones-to-watch-refactor-test/next-pages/")
+}}
+{{ $current := "hugo" }}
+<footer class="site-footer">
+  <nav class="variant-switch" aria-label="프레임워크 변형 전환">
+    {{ range $variants }}
+      {{ if eq .key $current }}
+        <a href="{{ .href }}" class="variant-link is-active" aria-current="page">{{ .label }}</a>
+      {{ else }}
+        <a href="{{ .href }}" class="variant-link">{{ .label }}</a>
+      {{ end }}
+    {{ end }}
+  </nav>
+  <p>&copy; {{ now.Year }} OTW for FE All rights reserved.</p>
+</footer>

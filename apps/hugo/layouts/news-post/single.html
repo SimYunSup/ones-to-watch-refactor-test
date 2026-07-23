@@ -1,0 +1,36 @@
+{{/*
+  Post detail page ("/news/post/<id>"). Ported from
+  apps/kudzu/src/pages/news/post/[slug].tsx. content/news/post/<id>.md
+  (written by scripts/prepare-data.mjs) only carries id/title in front
+  matter — raw Notion HTML is unsafe to hand-roll into front matter, so the
+  full entry (including .html) is re-looked-up here from site.Data.news.
+*/}}
+{{ define "main" }}
+{{ $id := .Params.id }}
+{{ $matches := where site.Data.news "id" $id }}
+<main class="post-page">
+  {{ if gt (len $matches) 0 }}
+    {{ $entry := index $matches 0 }}
+    {{ $dateLabel := "" }}
+    {{ with $entry.date }}
+      {{ $dateLabel = (time.AsTime .).Format "2006. 1. 2." }}
+    {{ end }}
+    {{ if $entry.coverUrl }}
+      <div class="image-container">
+        <img src="{{ $entry.coverUrl }}" alt="" />
+      </div>
+    {{ end }}
+    <h1 class="title">{{ $entry.title }}</h1>
+    {{ if $dateLabel }}
+      <div class="description">
+        <p>{{ $dateLabel }}</p>
+      </div>
+    {{ end }}
+    <article class="markdown-body">{{ $entry.html | safeHTML }}</article>
+  {{ end }}
+</main>
+{{ end }}
+
+{{ define "extra_head" }}
+<link rel="stylesheet" href="{{ "content.css" | relURL }}" />
+{{ end }}

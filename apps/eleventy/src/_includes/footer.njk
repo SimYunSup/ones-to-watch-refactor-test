@@ -1,0 +1,16 @@
+{#- Ported from apps/kudzu/src/components/Footer.tsx. `variants` comes from
+    src/_data/variants.js; `site.currentVariant` marks this app's own entry
+    active. #}
+<footer class="site-footer">
+  <nav class="variant-switch" aria-label="프레임워크 변형 전환">
+    {%- for variant in variants %}
+    <a
+      href="{{ variant.href }}"
+      class="variant-link{% if variant.key == site.currentVariant %} is-active{% endif %}"
+      {%- if variant.key == site.currentVariant %} aria-current="page"{% endif %}
+      >{{ variant.label }}</a
+    >
+    {%- endfor %}
+  </nav>
+  <p>&copy; {{ site.year }} OTW for FE All rights reserved.</p>
+</footer>

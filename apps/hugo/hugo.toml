@@ -1,0 +1,36 @@
+# Deployed under the shared GitHub Pages artifact's /hugo/ subpath, alongside
+# the astro/react-router/tanstack/kudzu variants (see apps/kudzu/kudzu.config.mjs
+# for the equivalent `base` setting) — baseURL carries this prefix so every
+# relURL/absURL call in layouts/ resolves correctly without a hand-rolled
+# BASE constant (unlike kudzu, whose framework does not rewrite
+# hand-authored <a href> values and needs one).
+baseURL = "https://simyunsup.github.io/ones-to-watch-refactor-test/hugo/"
+languageCode = "ko-KR"
+title = "Ones To Watch for FrontEnd"
+
+# Root-relative URLs (Hugo's default) rather than URLs relative to each
+# page's own depth — needed so the same stylesheet/search-asset links
+# resolve identically from both /hugo/ and /hugo/news/list/2/.
+relativeURLs = false
+
+# uglyURLs left unset (defaults to false/pretty): content/news/list/1.md
+# publishes to public/news/list/1/index.html, matching the archive route
+# contract (/news/list/<n>) shared by every variant.
+
+# Only the page/section(home)/404 kinds are in the route contract —
+# taxonomy, term, RSS, and sitemap are out of scope for this experiment.
+# `section` is disabled too: content/news/ is a plain grouping directory
+# (not a route of its own), so without this Hugo would still auto-generate
+# an unwanted /news/ list page for it.
+disableKinds = ["taxonomy", "term", "RSS", "sitemap", "section"]
+
+[params]
+description = "매주 프론트엔드 소식을 정리해서 보내드립니다."
+
+[markup.goldmark.renderer]
+# Not needed here: post bodies are never Markdown-rendered by Goldmark.
+# prepare-data.mjs writes empty-bodied post stubs, and
+# layouts/news-post/single.html injects entry.html (Notion's already-
+# rendered HTML) via the `safeHTML` template function, looked up from
+# site.Data.news — Goldmark's raw-HTML passthrough is never exercised.
+unsafe = false

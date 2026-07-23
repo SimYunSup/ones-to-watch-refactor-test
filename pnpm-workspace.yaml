@@ -4,7 +4,9 @@ packages:
 # pnpm 11 reads allowBuilds here; pnpm 10 (CI) reads pnpm.onlyBuiltDependencies
 # in the root package.json. Keep both in sync.
 allowBuilds:
+  core-js: false
   esbuild: true
+  hugo-bin: true
   sharp: true
   workerd: true
 minimumReleaseAgeExclude:

@@ -1,0 +1,54 @@
+{{/*
+  Archive page ("/news/list/<n>"). Ported from
+  apps/kudzu/src/pages/news/list/[page].tsx. content/news/list/<n>.md
+  (written by scripts/prepare-data.mjs) only carries the page number in
+  front matter — cards are sliced here from the full site.Data.news array
+  rather than duplicated per page file.
+*/}}
+{{ define "main" }}
+{{ $pageSize := 12 }}
+{{ $entries := site.Data.news }}
+{{ $page := .Params.page | default 1 | int }}
+{{ $pageCount := math.Max 1 (div (add (len $entries) (sub $pageSize 1)) $pageSize) | int }}
+{{ $start := mul (sub $page 1) $pageSize }}
+{{ $items := slice }}
+{{ if gt (len $entries) $start }}
+  {{ $items = first $pageSize (after $start $entries) }}
+{{ end }}
+<main class="archive">
+  <p class="mono-eyebrow">// archive</p>
+  <h1 class="archive-title">뉴스레터 아카이브</h1>
+
+  <div class="archive-search">
+    {{ partial "search-box.html" . }}
+  </div>
+
+  <div class="post-list">
+    {{ if gt (len $items) 0 }}
+      {{ range $items }}
+        {{ partial "post-card.html" (dict "entry" . "href" (printf "news/post/%s/" .id | relURL)) }}
+      {{ end }}
+    {{ else }}
+      <p class="archive-empty">게시물이 없습니다</p>
+    {{ end }}
+  </div>
+
+  <nav class="pager">
+    {{ if gt $page 1 }}
+      <a class="pager-btn" href="{{ printf "news/list/%d/" (sub $page 1) | relURL }}">← 이전</a>
+    {{ else }}
+      <span></span>
+    {{ end }}
+    <span class="pager-current">{{ $page }}</span>
+    {{ if lt $page $pageCount }}
+      <a class="pager-btn" href="{{ printf "news/list/%d/" (add $page 1) | relURL }}">다음 →</a>
+    {{ else }}
+      <span></span>
+    {{ end }}
+  </nav>
+</main>
+{{ end }}
+
+{{ define "extra_head" }}
+<script type="module" src="{{ "search.js" | relURL }}"></script>
+{{ end }}

@@ -4,7 +4,8 @@
 // as a standalone prebuild step instead: fetch entries -> map to search
 // docs -> serialize -> write to public/index.bin for vite to copy verbatim
 // into the static build output.
-import { fetchNewsEntries, entriesToSearchDocs, writeSearchIndexFile } from "@otw/notion-content";
+import { fetchNewsEntries } from "@otw/notion-content";
+import { entriesToSearchDocs, writeSearchIndexFile } from "@otw/notion-content/search";
 
 const entries = await fetchNewsEntries();
 const docs = entriesToSearchDocs(entries);

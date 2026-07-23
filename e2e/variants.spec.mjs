@@ -131,11 +131,11 @@ for (const variant of VARIANTS) {
       await expect(page.locator(".munja-panel")).toBeVisible({ timeout: 15_000 });
     });
 
-    test("footer variant-switch links to all four variants", async ({ page }) => {
+    test("footer variant-switch links to every variant", async ({ page }) => {
       await page.goto(homePath, { waitUntil: "load", timeout: 30_000 });
 
       const links = page.locator("nav.variant-switch a.variant-link");
-      await expect(links).toHaveCount(4);
+      await expect(links).toHaveCount(VARIANTS.length);
 
       const active = page.locator("nav.variant-switch a.variant-link.is-active");
       await expect(active).toHaveCount(1);

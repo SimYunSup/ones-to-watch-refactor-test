@@ -1,0 +1,19 @@
+{#- Ported from apps/kudzu/src/components/PostCard.tsx. Used from both the
+    home page (recentNews) and the archive (pageData.items), so it's a
+    macro rather than inline markup. `base` is passed explicitly (rather
+    than reading the `site` global inside the macro) since Nunjucks macros
+    don't inherit the calling template's context unless imported "with
+    context". #}
+{% macro postCard(entry, base) -%}
+<a class="row" href="{{ base }}/news/post/{{ entry.id }}/">
+  <span class="thumb">
+    {%- if entry.coverUrl %}
+    <img src="{{ entry.coverUrl }}" alt="" loading="lazy" />
+    {%- else %} thumbnail {%- endif %}
+  </span>
+  <span class="title">{{ entry.title }}</span>
+  {%- if entry.date %}
+  <span class="date">{{ entry.date | koDate }}</span>
+  {%- endif %}
+</a>
+{%- endmacro %}

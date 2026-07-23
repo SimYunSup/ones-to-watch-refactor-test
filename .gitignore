@@ -7,6 +7,18 @@ apps/tanstack-router/.nitro/
 apps/tanstack-router/.tanstack/
 apps/kudzu/dist/
 apps/kudzu/.kudzu/
+apps/hugo/public/
+apps/hugo/resources/
+apps/hugo/.hugo_build.lock
+apps/vitepress/.vitepress/dist/
+apps/vitepress/.vitepress/cache/
+apps/docusaurus/build/
+apps/docusaurus/.docusaurus/
+apps/eleventy/_site/
+apps/next-app/out/
+apps/next-app/.next/
+apps/next-pages/out/
+apps/next-pages/.next/
 packages/notion-content/dist/
 # local artifacts of the scripts/ benches and e2e runs
 site/
@@ -19,10 +31,27 @@ playwright-report/
 # generated types
 apps/web/.astro/
 apps/react-router/.react-router/
-# munja search index (generated at build time)
+# build-time generated data/assets (search index, munja wasm bundle,
+# hugo routing stubs, vitepress data cache)
 apps/web/public/index.bin
 apps/react-router/public/index.bin
+apps/react-router/public/munja/
 apps/tanstack-router/public/index.bin
+apps/tanstack-router/public/munja/
+apps/hugo/content/
+apps/hugo/data/news.json
+apps/hugo/static/index.bin
+apps/hugo/static/munja/
+apps/vitepress/public/index.bin
+apps/vitepress/public/munja/
+apps/docusaurus/static/index.bin
+apps/docusaurus/static/munja/
+apps/eleventy/src/index.bin
+apps/eleventy/src/munja/
+apps/next-app/public/index.bin
+apps/next-app/public/munja/
+apps/next-pages/public/index.bin
+apps/next-pages/public/munja/
 
 # dependencies
 node_modules/
