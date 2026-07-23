@@ -22,8 +22,8 @@ export async function loader({
   return entry;
 }
 
-export const meta: MetaFunction = ({ data }) => {
-  const entry = data as NewsEntry | undefined;
+export const meta: MetaFunction = ({ loaderData }) => {
+  const entry = loaderData as NewsEntry | undefined;
   return [{ title: entry ? `${entry.title} | OTW for FE` : "OTW for FE" }];
 };
 
