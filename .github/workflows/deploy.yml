@@ -11,9 +11,40 @@ concurrency:
   group: pages
   cancel-in-progress: true
 jobs:
+  # Fetch the Notion content once for the whole deploy and publish it as an
+  # artifact. Previously each of the four matrix builds — and react-router's and
+  # tanstack's search-index prebuilds — fetched the same database independently,
+  # so one deploy hit Notion with 6-7 concurrent full fetches and tripped its
+  # ~3 req/s rate limit (429). Now: one prefetch here + one live fetch from the
+  # astro build (notion-loader has its own image pipeline and skips the cache).
+  prefetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.20.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --no-frozen-lockfile
+      # prefetch.mjs imports the compiled dist of @otw/notion-content.
+      - run: pnpm --filter @otw/notion-content build
+      - name: Prefetch Notion content
+        run: node packages/notion-content/scripts/prefetch.mjs notion-cache/news-entries.json
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notion-cache
+          path: notion-cache/
+          retention-days: 1
   # Each variant builds in its own runner so total wall time is
   # install + slowest single build instead of the sum of all four.
   build:
+    needs: prefetch
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -45,9 +76,18 @@ jobs:
       # dist of @otw/notion-content at build time. Cheap (a tsc run), so each
       # runner just builds it locally instead of passing an artifact around.
       - run: pnpm --filter @otw/notion-content build
+      # Read the prefetched Notion content instead of each build re-fetching it.
+      - uses: actions/download-artifact@v4
+        with:
+          name: notion-cache
+          path: notion-cache
       - name: Build ${{ matrix.app }}
         run: pnpm --filter ${{ matrix.filter }} build
         env:
+          # Cache hit: builds read this file and make zero Notion API calls.
+          # Secrets stay set as a fallback (cache load failure) and because the
+          # astro build fetches live via notion-loader, which ignores the cache.
+          NOTION_CONTENT_CACHE: ${{ github.workspace }}/notion-cache/news-entries.json
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
       - uses: actions/upload-artifact@v4

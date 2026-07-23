@@ -1,4 +1,5 @@
-import { Client, isFullPage, iteratePaginatedAPI } from "@notionhq/client";
+import { readFile } from "node:fs/promises";
+import { APIErrorCode, Client, isFullPage, isNotionClientError, iteratePaginatedAPI } from "@notionhq/client";
 import type { PageObjectResponse } from "@notionhq/client";
 import { collectBlocks } from "./blocks.js";
 import { fileToUrl, richTextToPlainText } from "./format.js";
@@ -35,11 +36,15 @@ const entriesByCacheKey = new Map<string, Promise<NewsEntry[]>>();
 export function fetchNewsEntries(options: FetchNewsEntriesOptions = {}): Promise<NewsEntry[]> {
   const auth = options.auth ?? process.env.NOTION_TOKEN;
   const databaseId = options.databaseId ?? process.env.NOTION_DATABASE_ID;
-  const cacheKey = `${auth ?? ""}::${databaseId ?? ""}`;
+  // Include the cache path in the memo key so (auth, databaseId, cache) each
+  // resolve to a single load: a process reading a prebuilt cache and one
+  // fetching live never share the same memoized promise.
+  const cachePath = process.env.NOTION_CONTENT_CACHE;
+  const cacheKey = `${auth ?? ""}::${databaseId ?? ""}::${cachePath ?? ""}`;
 
   let entries = entriesByCacheKey.get(cacheKey);
   if (!entries) {
-    entries = loadNewsEntries(auth, databaseId);
+    entries = loadNewsEntries(auth, databaseId, cachePath);
     entriesByCacheKey.set(cacheKey, entries);
   }
   return entries;
@@ -47,8 +52,30 @@ export function fetchNewsEntries(options: FetchNewsEntriesOptions = {}): Promise
 
 async function loadNewsEntries(
   auth: string | undefined,
-  databaseId: string | undefined
+  databaseId: string | undefined,
+  cachePath: string | undefined
 ): Promise<NewsEntry[]> {
+  // Prefer a prebuilt cache when NOTION_CONTENT_CACHE points at one. The CI
+  // `prefetch` job queries Notion once and writes news-entries.json; every
+  // parallel matrix build then reads that file instead of re-fetching, which
+  // is the main defense against 429 rate limits. A missing or malformed cache
+  // falls back to a live fetch — loudly (warn with path and reason), never
+  // silently — so local builds and cache-write failures still succeed.
+  if (cachePath) {
+    try {
+      const raw = await readFile(cachePath, "utf8");
+      const parsed = JSON.parse(raw) as { entries?: NewsEntry[] };
+      if (!Array.isArray(parsed.entries)) {
+        throw new Error("cache is missing an `entries` array");
+      }
+      return parsed.entries;
+    } catch (error) {
+      console.warn(
+        `@otw/notion-content: failed to load cache ${cachePath}, falling back to a live Notion fetch: ${errorMessage(error)}`
+      );
+    }
+  }
+
   if (!auth || !databaseId) {
     console.warn(
       "@otw/notion-content: NOTION_TOKEN or NOTION_DATABASE_ID not set; returning an empty list."
@@ -56,7 +83,10 @@ async function loadNewsEntries(
     return [];
   }
 
-  const client = new Client({ auth });
+  // Raise maxRetries above the SDK default (2) so transient 429s back off and
+  // retry (the SDK honors the retry-after header) instead of surfacing as a
+  // hard error mid-build.
+  const client = new Client({ auth, retry: { maxRetries: 5 } });
 
   // A Notion database can contain multiple data sources; query the first one.
   const database: any = await client.databases.retrieve({ database_id: databaseId });
@@ -107,6 +137,17 @@ async function renderPage(client: Client, page: PageObjectResponse): Promise<New
     const { html, headings } = await createProcessor().process(blocks);
     return { id: page.id, title, date, coverUrl, html, headings };
   } catch (error) {
+    // A rate-limit or unavailable-service error means Notion throttled us, not
+    // that this page is malformed. Swallowing it here would silently drop a
+    // real post from the deployed site, so rethrow to fail the build loudly.
+    // Every other render error (a genuinely broken page) stays warn-and-skip.
+    if (
+      isNotionClientError(error) &&
+      (error.code === APIErrorCode.RateLimited ||
+        error.code === APIErrorCode.ServiceUnavailable)
+    ) {
+      throw error;
+    }
     console.warn(
       `@otw/notion-content: failed to render page ${page.id} (${title || "untitled"}): ${errorMessage(error)}`
     );

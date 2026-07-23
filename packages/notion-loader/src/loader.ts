@@ -30,7 +30,10 @@ export function notionLoader({
   rehypePlugins?: any[];
   [key: string]: any;
 }): Loader {
-  const notionClient = new Client(clientOptions);
+  // Default maxRetries above the SDK's 2 so transient 429s back off and retry
+  // (the SDK honors retry-after) instead of failing the build. Spread
+  // clientOptions last so an explicit caller-supplied `retry` still wins.
+  const notionClient = new Client({ retry: { maxRetries: 5 }, ...clientOptions });
 
   // A Notion database can contain multiple data sources; query the first one.
   // Resolved lazily and memoized so both schema() and load() share one lookup.

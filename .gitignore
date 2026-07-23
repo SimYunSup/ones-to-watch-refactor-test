@@ -13,6 +13,7 @@ site/
 visual-diff/
 bench/
 origin-diff/
+notion-cache/
 test-results/
 playwright-report/
 # generated types

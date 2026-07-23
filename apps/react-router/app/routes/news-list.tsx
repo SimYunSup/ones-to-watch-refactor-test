@@ -42,8 +42,8 @@ export async function loader({
   return { page, hasPrev: page > 1, hasNext: page < pageCount, cards };
 }
 
-export const meta: MetaFunction = ({ data }) => {
-  const page = (data as NewsListLoaderData | undefined)?.page;
+export const meta: MetaFunction = ({ loaderData }) => {
+  const page = (loaderData as NewsListLoaderData | undefined)?.page;
   return [{ title: page ? `${page}페이지 | OTW for FE` : "OTW for FE" }];
 };
 
