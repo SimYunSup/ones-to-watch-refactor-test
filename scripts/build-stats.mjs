@@ -132,7 +132,18 @@ const variants = [
   },
 ];
 
-/** Recursively walk a directory, returning { totalBytes, jsBytes, fileCount }. */
+// Image extensions excluded from the size totals below. Only astro bundles
+// Notion content images into its own build output (via astro:assets); the
+// other variants reference remote/deploy-localized images, so counting image
+// bytes would inflate astro's "총 출력 크기" and make the cross-variant size
+// comparison apples-to-oranges. Excluding images keeps the column a fair
+// measure of code/markup output only.
+const IMAGE_EXTENSIONS = new Set([
+  ".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif", ".svg", ".ico",
+]);
+
+/** Recursively walk a directory, returning { totalBytes, jsBytes, fileCount }.
+ *  Image files are skipped entirely (see IMAGE_EXTENSIONS). */
 function collectDirStats(dir) {
   const stats = { totalBytes: 0, jsBytes: 0, fileCount: 0 };
   if (!existsSync(dir)) return stats;
@@ -147,6 +158,7 @@ function collectDirStats(dir) {
         continue;
       }
       if (!entry.isFile()) continue;
+      if (IMAGE_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) continue;
       const size = statSync(entryPath).size;
       stats.totalBytes += size;
       stats.fileCount += 1;
@@ -270,12 +282,12 @@ async function main() {
     ko: {
       header: "| 변형 | 기반 | 특징 | 빌드 시간(s) | 총 출력 크기 | JS 크기 | 파일 수 | 원본 대비 diff |",
       kind: (v) => v.kind.ko,
-      footnote: `_로컬에서 \`pnpm run build:stats\`로 측정(수동 갱신), 콘텐츠 양·머신에 따라 변동. 빌드 시간 오름차순 정렬. "원본 대비 diff"는 \`pnpm run origin:diff\`가 만든 홈 화면 픽셀 diff(라이브 원본 대비, 이미지·분석 스크립트 차단 상태)이며 없으면 \`-\`. 측정 머신: ${specKo}. 측정 시각: ${measuredAt}_`,
+      footnote: `_로컬에서 \`pnpm run build:stats\`로 측정(수동 갱신), 콘텐츠 양·머신에 따라 변동. 빌드 시간 오름차순 정렬. "총 출력 크기"·"파일 수"는 이미지 파일 제외(변형별 이미지 처리 방식 차이로 인한 불공정 비교 방지). "원본 대비 diff"는 \`pnpm run origin:diff\`가 만든 홈 화면 픽셀 diff(라이브 원본 대비, 이미지·분석 스크립트 차단 상태)이며 없으면 \`-\`. 측정 머신: ${specKo}. 측정 시각: ${measuredAt}_`,
     },
     en: {
       header: "| Variant | Based | Type | Build (s) | Total size | JS size | Files | Origin diff |",
       kind: (v) => v.kind.en,
-      footnote: `_Measured locally via \`pnpm run build:stats\` (manual refresh); varies with content volume and machine. Sorted by build time asc. "Origin diff" is the home-page pixel delta vs the live origin from \`pnpm run origin:diff\` (images/analytics blocked), or \`-\` if not run. Machine: ${specEn}. Measured at: ${measuredAt}_`,
+      footnote: `_Measured locally via \`pnpm run build:stats\` (manual refresh); varies with content volume and machine. Sorted by build time asc. "Total size"/"Files" exclude image files (image handling differs per variant, so counting them would be an unfair comparison). "Origin diff" is the home-page pixel delta vs the live origin from \`pnpm run origin:diff\` (images/analytics blocked), or \`-\` if not run. Machine: ${specEn}. Measured at: ${measuredAt}_`,
     },
   };
   const divider = "| --- | --- | --- | --- | --- | --- | --- | --- |";

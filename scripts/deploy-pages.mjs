@@ -23,7 +23,9 @@
 //
 // Usage: node ./scripts/deploy-pages.mjs [--skip-build]
 import { spawnSync } from "node:child_process";
-import { rmSync, writeFileSync } from "node:fs";
+import { existsSync, rmSync, writeFileSync } from "node:fs";
+import { readFile, writeFile, readdir, mkdir } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { assembleSite } from "./lib/site-server.mjs";
@@ -71,6 +73,17 @@ assembleSite(repoRoot, siteDir, { toolName: "deploy-pages" });
 // Next.js emits _next/ — Jekyll (Pages' default processor) drops _-prefixed
 // dirs, so opt out of Jekyll entirely.
 writeFileSync(path.join(siteDir, ".nojekyll"), "");
+
+// Localize Notion's presigned S3 images across every assembled variant.
+// Notion `type: "file"` images are served from prod-files-secure.s3 behind a
+// presigned URL that expires ~1h after Notion mints it (X-Amz-Expires=3600).
+// All variants except astro (which runs them through astro:assets at build
+// time) bake that URL straight into their output, so once deployed the images
+// 403 as soon as the signature lapses. Rather than patching ten different
+// build pipelines — and the SPA variants embed each URL twice, once in the
+// static <img src> and again in their hydration payload — this walks the
+// single assembled artifact and rewrites every reference at once.
+await localizeNotionImages(siteDir);
 
 // Publish site/ as a fresh orphan commit on gh-pages without touching the
 // current branch's working tree or index: stage site/ into a throwaway
@@ -120,3 +133,160 @@ if (!configured) {
 }
 
 console.log("deploy-pages: pushed gh-pages — the site will update in a minute or two.");
+
+/** Recursively collect every text file (by extension) under `dir`. */
+async function collectTextFiles(dir) {
+  const dirents = await readdir(dir, { withFileTypes: true });
+  const nested = await Promise.all(
+    dirents.map((dirent) => {
+      const full = path.join(dir, dirent.name);
+      if (dirent.isDirectory()) return collectTextFiles(full);
+      // Only rewrite text formats that can carry a Notion URL. Downloaded
+      // images live under assets/notion/ and are binary, so they never match.
+      return /\.(html|js|json|txt)$/i.test(dirent.name) ? [full] : [];
+    }),
+  );
+  return nested.flat();
+}
+
+/**
+ * Download every presigned Notion S3 image referenced anywhere in the
+ * assembled site and rewrite all references to a permanent local copy.
+ *
+ * The same URL appears in up to three encodings across the variants:
+ *   1. HTML attribute entities — `&` written as `&amp;` (static <img src>).
+ *   2. JS/JSON unicode escapes — `&` written as `\u0026` (SPA hydration
+ *      payloads: react-router's streamed context, Next's flight data, etc.).
+ *   3. Raw `&` — plain, unescaped.
+ * Each encoded form is captured verbatim so it can be found-and-replaced
+ * literally later, and separately decoded back to a real URL for fetching.
+ */
+async function localizeNotionImages(siteDir) {
+  const files = await collectTextFiles(siteDir);
+
+  // Three capture patterns for the same underlying URL. Each stops at the
+  // delimiter its encoding can't contain, so the captured span is exactly the
+  // encoded URL as it sits in the file.
+  const patterns = [
+    // HTML entity form: separators are `&amp;`; the span ends at `"`.
+    /https:\/\/prod-files-secure\.s3\.[^"'\s\\<>]+/g,
+    // JS unicode-escape form: `\u0026` separators are allowed inside; the span
+    // ends at a quote, whitespace, or any other backslash escape.
+    /https:\/\/prod-files-secure\.s3\.(?:\\u0026|[^"'\s\\])+/g,
+  ];
+
+  // decoded real URL -> Set of the encoded originals seen across all files.
+  const decodedToEncoded = new Map();
+  for (const file of files) {
+    const text = await readFile(file, "utf8");
+    if (!text.includes("prod-files-secure")) continue;
+    for (const pattern of patterns) {
+      for (const match of text.matchAll(pattern)) {
+        const encoded = match[0];
+        const decoded = encoded.replaceAll("\\u0026", "&").replaceAll("&amp;", "&");
+        let set = decodedToEncoded.get(decoded);
+        if (!set) {
+          set = new Set();
+          decodedToEncoded.set(decoded, set);
+        }
+        set.add(encoded);
+      }
+    }
+  }
+
+  if (decodedToEncoded.size === 0) return;
+
+  // encoded original string -> local absolute path. Populated only for URLs
+  // that download successfully; a failed fetch is warned about and left
+  // pointing at its original (soon-to-expire) URL rather than failing deploy.
+  const replacements = new Map();
+  const assetsDir = path.join(siteDir, "assets", "notion");
+  const decodedUrls = [...decodedToEncoded.keys()];
+
+  // A full archive can reference dozens of images; a small fixed batch size
+  // downloads them in parallel without hammering S3 all at once.
+  const CONCURRENCY = 8;
+  for (let i = 0; i < decodedUrls.length; i += CONCURRENCY) {
+    const batch = decodedUrls.slice(i, i + CONCURRENCY);
+    await Promise.all(
+      batch.map(async (url) => {
+        let objectKey;
+        try {
+          objectKey = new URL(url).pathname;
+        } catch (error) {
+          console.warn(`deploy-pages: skipping unparseable Notion image URL ${url}: ${String(error)}`);
+          return;
+        }
+        // Pattern 1 stops at the first backslash, so for a `\u0026`-escaped
+        // hydration URL it also yields a signature-less prefix fragment that
+        // would always 403. Every real presigned URL carries X-Amz-Signature,
+        // so skip anything without it — the full URL is still captured by the
+        // `\u0026`-aware pattern and localized normally.
+        if (!url.includes("X-Amz-Signature=")) return;
+        // Hash only the object key, never the query string: the query carries
+        // the presigned signature, which Notion mints fresh on every build, so
+        // hashing the full URL would rename the same image on each rebuild.
+        const hash = createHash("sha256").update(objectKey).digest("hex").slice(0, 16);
+        // Restrict to the image extensions Notion actually serves; anything
+        // else (or a key with no extension) falls back to .png. The static
+        // server picks the response MIME type off this extension.
+        const extMatch = /\.(png|jpe?g|gif|webp)$/i.exec(objectKey);
+        const ext = extMatch ? extMatch[0].toLowerCase() : ".png";
+        const localName = `${hash}${ext}`;
+        const destPath = path.join(assetsDir, localName);
+        // Assets live at the site root (not under any variant dir) so every
+        // variant shares one copy via the same Pages-absolute URL regardless
+        // of its own base prefix.
+        const localSrc = `/ones-to-watch-refactor-test/assets/notion/${localName}`;
+
+        // Skip the download when this object key was already fetched in this
+        // run: several differently-signed URLs can point at the same image and
+        // all hash to this one destPath, so one download is shared. A failed
+        // fetch is warned and skipped, leaving the original (expiring) URL in
+        // place rather than breaking the deploy over one missing asset.
+        if (!existsSync(destPath)) {
+          let res;
+          try {
+            res = await fetch(url);
+          } catch (error) {
+            console.warn(`deploy-pages: failed to fetch Notion image ${url}: ${String(error)}`);
+            return;
+          }
+          if (!res.ok) {
+            console.warn(`deploy-pages: failed to fetch Notion image ${url}: HTTP ${res.status}`);
+            return;
+          }
+          await mkdir(assetsDir, { recursive: true });
+          await writeFile(destPath, Buffer.from(await res.arrayBuffer()));
+        }
+
+        for (const encoded of decodedToEncoded.get(url)) {
+          replacements.set(encoded, localSrc);
+        }
+      }),
+    );
+  }
+
+  if (replacements.size === 0) return;
+
+  let filesChanged = 0;
+  for (const file of files) {
+    let text = await readFile(file, "utf8");
+    let changed = false;
+    for (const [encoded, localSrc] of replacements) {
+      if (text.includes(encoded)) {
+        text = text.split(encoded).join(localSrc);
+        changed = true;
+      }
+    }
+    if (changed) {
+      await writeFile(file, text);
+      filesChanged++;
+    }
+  }
+  // Count distinct localized images (unique local paths), not encoded refs:
+  // one image embedded in multiple encodings maps to several `replacements`
+  // entries but is a single downloaded file.
+  const imageCount = new Set(replacements.values()).size;
+  console.log(`deploy-pages: localized ${imageCount} images across ${filesChanged} files`);
+}
