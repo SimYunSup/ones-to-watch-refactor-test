@@ -1,28 +1,10 @@
 {
-  "measuredAt": "2026-07-24T05:31:53.234Z",
+  "measuredAt": "2026-07-24T05:41:59.755Z",
   "machine": {
     "ko": "Apple M1 Max · 10코어 · RAM 64 GB · darwin/arm64 · Node v24.17.0",
     "en": "Apple M1 Max · 10 cores · 64 GB RAM · darwin/arm64 · Node v24.17.0"
   },
   "rows": [
-    {
-      "label": "Hugo",
-      "version": "0.161.0",
-      "name": "Hugo 0.161.0",
-      "based": "Go (templates)",
-      "kind": {
-        "ko": "SSG 특화",
-        "en": "SSG-focused"
-      },
-      "ok": true,
-      "seconds": 1.1,
-      "totalBytes": 291444,
-      "jsBytes": 15178,
-      "totalSize": "284.6 KB",
-      "jsSize": "14.8 KB",
-      "fileCount": 9,
-      "originDiff": null
-    },
     {
       "label": "Eleventy",
       "version": "3.1.6",
@@ -33,7 +15,7 @@
         "en": "SSG-focused"
       },
       "ok": true,
-      "seconds": 1.1,
+      "seconds": 0.7,
       "totalBytes": 291665,
       "jsBytes": 15351,
       "totalSize": "284.8 KB",
@@ -51,12 +33,30 @@
         "en": "SSG-focused"
       },
       "ok": true,
-      "seconds": 1.2,
+      "seconds": 0.8,
       "totalBytes": 291782,
       "jsBytes": 16303,
       "totalSize": "284.9 KB",
       "jsSize": "15.9 KB",
       "fileCount": 12,
+      "originDiff": null
+    },
+    {
+      "label": "Hugo",
+      "version": "0.161.0",
+      "name": "Hugo 0.161.0",
+      "based": "Go (templates)",
+      "kind": {
+        "ko": "SSG 특화",
+        "en": "SSG-focused"
+      },
+      "ok": true,
+      "seconds": 0.8,
+      "totalBytes": 291444,
+      "jsBytes": 15178,
+      "totalSize": "284.6 KB",
+      "jsSize": "14.8 KB",
+      "fileCount": 9,
       "originDiff": null
     },
     {
@@ -69,11 +69,47 @@
         "en": "SSG-focused"
       },
       "ok": true,
-      "seconds": 1.9,
+      "seconds": 1.5,
       "totalBytes": 389588,
       "jsBytes": 115218,
       "totalSize": "380.5 KB",
       "jsSize": "112.5 KB",
+      "fileCount": 17,
+      "originDiff": null
+    },
+    {
+      "label": "Astro",
+      "version": "7.1.3",
+      "name": "Astro 7.1.3",
+      "based": "Astro islands (vanilla)",
+      "kind": {
+        "ko": "SSG 특화",
+        "en": "SSG-focused"
+      },
+      "ok": true,
+      "seconds": 1.6,
+      "totalBytes": 427750,
+      "jsBytes": 102301,
+      "totalSize": "417.7 KB",
+      "jsSize": "99.9 KB",
+      "fileCount": 19,
+      "originDiff": null
+    },
+    {
+      "label": "Docusaurus",
+      "version": "3.10.2",
+      "name": "Docusaurus 3.10.2",
+      "based": "React",
+      "kind": {
+        "ko": "SSG 특화",
+        "en": "SSG-focused"
+      },
+      "ok": true,
+      "seconds": 1.7,
+      "totalBytes": 572272,
+      "jsBytes": 295512,
+      "totalSize": "558.9 KB",
+      "jsSize": "288.6 KB",
       "fileCount": 17,
       "originDiff": null
     },
@@ -87,7 +123,7 @@
         "en": "SSG-capable"
       },
       "ok": true,
-      "seconds": 3.2,
+      "seconds": 2.5,
       "totalBytes": 610304,
       "jsBytes": 329419,
       "totalSize": "596.0 KB",
@@ -105,7 +141,7 @@
         "en": "SSG-capable"
       },
       "ok": true,
-      "seconds": 3.8,
+      "seconds": 3,
       "totalBytes": 615999,
       "jsBytes": 341450,
       "totalSize": "601.6 KB",
@@ -123,30 +159,12 @@
         "en": "SSG-capable"
       },
       "ok": true,
-      "seconds": 3.9,
+      "seconds": 3.8,
       "totalBytes": 821627,
       "jsBytes": 541645,
       "totalSize": "802.4 KB",
       "jsSize": "529.0 KB",
       "fileCount": 37,
-      "originDiff": null
-    },
-    {
-      "label": "Astro",
-      "version": "7.1.3",
-      "name": "Astro 7.1.3",
-      "based": "Astro islands (vanilla)",
-      "kind": {
-        "ko": "SSG 특화",
-        "en": "SSG-focused"
-      },
-      "ok": true,
-      "seconds": 4.1,
-      "totalBytes": 427750,
-      "jsBytes": 102301,
-      "totalSize": "417.7 KB",
-      "jsSize": "99.9 KB",
-      "fileCount": 19,
       "originDiff": null
     },
     {
@@ -159,30 +177,12 @@
         "en": "SSG-capable"
       },
       "ok": true,
-      "seconds": 6.7,
+      "seconds": 4.3,
       "totalBytes": 1088169,
       "jsBytes": 652338,
       "totalSize": "1.0 MB",
       "jsSize": "637.0 KB",
       "fileCount": 54,
-      "originDiff": null
-    },
-    {
-      "label": "Docusaurus",
-      "version": "3.10.2",
-      "name": "Docusaurus 3.10.2",
-      "based": "React",
-      "kind": {
-        "ko": "SSG 특화",
-        "en": "SSG-focused"
-      },
-      "ok": true,
-      "seconds": 7.2,
-      "totalBytes": 572272,
-      "jsBytes": 295512,
-      "totalSize": "558.9 KB",
-      "jsSize": "288.6 KB",
-      "fileCount": 17,
       "originDiff": null
     }
   ]
