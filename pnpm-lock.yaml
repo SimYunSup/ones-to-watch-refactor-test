@@ -118,8 +118,8 @@ importers:
   apps/kudzu:
     dependencies:
       '@kudzujs/core':
-        specifier: ^0.5.2
-        version: 0.5.2
+        specifier: ^0.5.8
+        version: 0.5.8
       '@otw/notion-content':
         specifier: workspace:*
         version: link:../../packages/notion-content
@@ -2591,8 +2591,8 @@ packages:
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
 
-  '@kudzujs/core@0.5.2':
-    resolution: {integrity: sha512-HU1C6tbyyeMpvXJXLCgYeVbvwN3LCkQXryWoLk4NgvUXjFB21/4zJWRmhtbGBkYPNs3odVGAlSwMKCRHg8Qh0g==}
+  '@kudzujs/core@0.5.8':
+    resolution: {integrity: sha512-f1hUrNARz24IZFautLQzg4RMohAxWfIaVsAAqjhe1n8adAxn9WzX5x5YfYc4n9CVu+63QvhhDafjJE5f6Z+Ghw==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -12012,7 +12012,7 @@ snapshots:
 
   '@keyv/serialize@1.1.1': {}
 
-  '@kudzujs/core@0.5.2':
+  '@kudzujs/core@0.5.8':
     dependencies:
       esbuild: 0.28.1
       typescript: 5.9.3

@@ -14,3 +14,4 @@ minimumReleaseAgeExclude:
   - '@react-router/dev@8.3.0'
   - '@react-router/node@8.3.0'
   - react-router@8.3.0
+  - '@kudzujs/core@0.5.8'
