@@ -7,7 +7,7 @@
     "build": "kudzu build"
   },
   "dependencies": {
-    "@kudzujs/core": "^0.5.2",
+    "@kudzujs/core": "^0.5.8",
     "@otw/notion-content": "workspace:*",
     "@pickhealer/munja": "^0.1.0"
   },
